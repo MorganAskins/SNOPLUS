@@ -1,0 +1,116 @@
+G4double density,		// density
+  a,				// atomic mass
+  z;				// atomic number
+G4String name,			// name
+  symbol;			// symbol
+G4int ncompenents,		// number of compenents
+  iz,				// number of protons
+  ia;				// number of nucleons
+G4double abundance,		// abundance
+  temperature,			// temperature
+  pressure;			// pressure
+
+// Matierals
+const G4int NUMENTRIES = 3;
+
+// quartz (for pmt glass)
+G4Element* O = new G4Element(name="Oxygen", symbol="O", z=8, a=16.00*g/mole);
+G4Element* Si = new G4Element(name="Silicon", symbol="Si", z=14, a=28.09*g/mole);
+G4Material* quartz = new G4Material(name="quartz", density=2.200*g/cm3, ncomponents=2);
+quartz->AddElement(Si, 1);
+quartz->AddElement(O, 2);
+// optical properties for quartz
+G4double quartz_PP[NUMENTRIES] = {5*eV, 6.69*eV, 7.5*eV}; // wavelengths range
+G4double quartz_RIND[NUMENTRIES] = {1.51, 1.57, 1.61};	  // refractive index
+G4double quartz_ABSL[NUMETNRIES] = {3*cm, 3*cm, 3*cm};	  // Absorption Length
+G4MaterialPropertiesTable* quartz_mt = new G4MaterialPropertiesTable();
+quartz_mt->AddProperty("RINDEX", quartz_PP, quartz_RIND, NUMENTRIES);
+quartz_mt->AddProperty("ABSLENGTH", quartz_PP, quartz_ABSL, NUMENTRIES);
+quartz->SetMaterialPropertiesTable(quartz_mt);
+
+// aluminum
+G4Element* Al = new G4Element(name="Aluminum", symbol="Al", z=13, a=26.98);
+G4Material* metalAl = new G4Material(name="MetalAluminum", density=2.700*g/cm3, ncomponents=1);
+metalAl->AddElement(Al, 1);
+
+// photocathode aluminum
+G4Material* cathmetalAl = new G4Material(name="CathodeMetalAluminum", density=2.700*g/cm3, ncomponents=1);
+cathmetalAl->AddElement(Al, 1);
+
+G4double cathmetal_PP[NUMENTRIES] = {5*eV, 6.69eV, 7.5eV}; // wavelengths range
+G4double cathmetal_RIND[NUMENTRIES] = {1.51, 1.57, 1.61};  // refractive index
+G4double cathmetal_ABSL[NUMENTRIES] = {1e-20*m, 1e-20*m, 1e-20*m}; // Absorption Length
+G4MaterialPropertiesTable* cathmetal_mt = new G4MaterialPropertiesTable();
+cathmetal_mt->AddProperty("RINDEX", cathmetal_PP, cathmetal_RIND, NUMENTRIES);
+cathmetal_mt->AddProperty("ABSLENGTH", cathmetal_PP, cathmetal_ABSL, NUMENTRIES);
+cathmetalAl->SetMaterialPropertiesTable(cathmetal_mt);
+
+// iron
+G4Element* Fe = new G4Element(name="Iron"  ,symbol="Fe" , z= 26., a=55.85*g/mole);  
+G4Material* metalFe = new G4Material(name="MetalIron", density=7.874*g/cm3, ncomponents=1);
+metalFe->AddElement(Fe, 1);
+
+
+// stainless steel
+G4Element* C  = new G4Element( "Carbon", "C",   6. , 12.011*g/mole);
+G4Element* Co = new G4Element( "Cobalt", "Co", 27. , 58.9332*g/mole);
+G4Material* ssteel = new G4Material(name="Steel", density=7.7*g/cm3, ncomponents=3);
+ssteel->AddElement(C, 0.04);
+ssteel->AddElement(Fe, 0.88);
+ssteel->AddElement(Co, 0.08);
+
+
+// copper
+G4Element* Cu = new G4Element(name="Copper"  ,symbol="Cu" , z= 29., a=63.55*g/mole);  
+G4Material* metalCu = new G4Material(name="MetalCopper", density=8.960*g/cm3, ncomponents=1);
+metalCu->AddElement(Cu, 1);
+
+// lead
+G4Element* Pb = new G4Element(name="Lead",symbol="Pb" , z= 82., a=207.2*g/mole);
+G4Material* metalPb = new G4Material(name="MetalLead", density=11.340*g/cm3, ncomponents=1);
+metalPb->AddElement(Pb, 1);
+
+// air
+G4Element* N = new G4Element(name="Nitrogen", symbol="N", z=7, a=14.00674*g/mole);
+G4Material* Air = new G4Material("AIR", 1.2929*kg/m3, 2, kStateGas, 300*kelvin, 1*atmosphere);
+Air->AddElement(N, 0.8);
+Air->AddElement(O, 0.2);
+
+// concrete
+G4Element* H = new G4Element(name="Hydrogen",symbol="H" , z= 1., a=1.00794*g/mole);
+G4Element* Ca = new G4Element(name="Calcium",symbol="Ca" , z= 20., a=40.078*g/mole);
+G4Material* concrete = new G4Material(name="Concrete", density=2.3*g/cm3, ncomponents=6);
+concrete->AddElement(Si, 0.227915);
+concrete->AddElement(O, 0.60541);
+concrete->AddElement(H, 0.09972);
+concrete->AddElement(Ca, 0.04986);
+concrete->AddElement(Al, 0.014245);
+concrete->AddElement(Fe, 0.00285);
+
+// scintillator (TODO: too simple)
+G4Material* liquid_scintillator = new G4Material(name="LiquidScintillator",
+						 density=0.9*g/cm3, ncomponents=2);
+liquid_scintillator->AddElement(C, 1);
+liquid_scintillator->AddElement(H, 2);
+G4double scint_PP[NUMENTRIES] = {7.0*eV, 7.07*eV, 7.14*eV}; // wavelengths
+G4double scint_SCINT[NUMENTRIES] = {0.1, 1.0, 0.1}; // efficiency to scintillate
+G4double scint_RIND[NUMENTRIES] = {1.5, 1.5, 1.5};  // refractive index
+G4double scint_ABSL[NUMENTRIES] = {35*cm, 35*cm, 35*cm}; // Absorption Length
+G4MaterialPropertiesTable* scint_mt = new G4MaterialPropertiesTable();
+scint_mt->AddProperty("FASTCOMPONENT", scint_PP, scint_SCINT, NUMENTRIES);
+scint_mt->AddProperty("SLOWCOMPONENT", scint_PP, scint_SCINT, NUMENTRIES);
+scint_mt->AddProperty("RINDEX", scint_PP, scint_RIND, NUMENTRIES);
+scint_mt->AddProperty("ABSLENGTH", scint_PP, scint_ABSL, NUMENTRIES);
+scint_mt->AddConstProperty("SCINTILLATIONYIELD", 12000/MeV);
+scint_mt->AddConstProperty("RESOLUTIONSCALE", 1.0);
+scint_mt->AddConstProperty("FASTTIMECONSTANT", 20*ns);
+scint_mt->AddConstProperty("YIELDRATIO", 1.0);
+liquid_scintillator->SetMaterialPropertiesTable(scint_mt);
+
+// assign materials
+
+world_mat = concrete;
+lab_mat = Air;
+target_mat = scintillator;
+pmt_mat = quartz;
+phcath_mat = cathmetalAl;

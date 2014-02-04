@@ -1,0 +1,7 @@
+// Materials to include in detector
+
+G4Material* world_mat;
+G4Material* lab_mat;
+G4Material* target_mat;
+G4Material* pmt_mat;
+G4Material* phcath_mat;
