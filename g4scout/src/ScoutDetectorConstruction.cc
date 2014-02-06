@@ -3,7 +3,7 @@
 #include "ScoutDetectorConstruction.hh"
 #include "ScoutDetectorMessenger.hh"
 #include "ScoutScintSD.hh"
-#include "ScoutPMTSD.hh"
+#include "ScoutPmtSD.hh"
 
 #include "G4SystemOfUnits.hh"
 #include "G4Material.hh"
@@ -178,7 +178,7 @@ G4VPhysicalVolume* ScoutDetectorConstruction::Construct()
 
   SDMan = G4SDManager::GetSDMpointer();
   name="/Scout/PMTSD";
-  PMTSD = new ScoutPMTSD(name, this);
+  PMTSD = new ScoutPmtSD(name, this);
   SDMan->AddNewDetector(PMTSD);
   mPhcathLog->SetSensitiveDetector(PMTSD);
 

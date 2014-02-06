@@ -1,0 +1,30 @@
+#ifndef SCOUTSTACKINGACTION_h
+#define SCOUTSTACKINGACTION_h
+
+#include "globals.hh"
+#include "G4UserStackingAction.hh"
+
+class ScoutStackingActionMessenger;
+class G4Navigator;
+class G4Track;
+
+/*!
+  @class ScoutStackingAction
+  @breif TODO ... update this once
+  I understand what it is for ...
+*/
+
+class ScoutStackingAction : public G4UserStackingAction
+{
+  G4Navigator* mNavigator;
+public:
+  ScoutStackingAction();
+  virtual ~ScoutStackingAction();
+  virtual G4ClassificationOfNewTrack ClassifyNewTrack(const G4Track* track);
+  virtual void NewStage();
+  virtual void PrepareNewEvent();
+
+  ScoutStackingActionMessenger* mStackingMessenger;
+};
+
+#endif
