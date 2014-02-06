@@ -7,11 +7,8 @@
 #include "globals.hh"
 
 ScoutRunActionMessenger::ScoutRunActionMessenger(ScoutRunAction* run)
-  :mRunAction(run)
-{};
+  :mRunAction(run){}
 
-ScoutRunActionMessenger::~ScoutRunActionMessenger()
-{};
+ScoutRunActionMessenger::~ScoutRunActionMessenger(){}
 
-void ScoutRunActionMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
-{};
+void ScoutRunActionMessenger::SetNewValue(G4UIcommand* command, G4String newValue){}

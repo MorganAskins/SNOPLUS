@@ -50,8 +50,8 @@ public:
   void GeneratePrimaryVertex(G4Event *event);
 
   // position distribution
-  void SetPosType(G4String PosType){mPosType = PosType;}
-  void SetPosShape(G4String PosShape){mPosShape = PosShape;}
+  void SetSourceType(G4String SourceType){mSourceType = SourceType;}
+  void SetShape(G4String aShape){mShape = aShape;}
   void SetCenterCoords(G4ThreeVector coords){mCenterCoords = coords;}
   void SetHalfZ(G4double halfz){mHalfZ = halfz;}
   void SetRadius(G4double radius){mRadius = radius;}

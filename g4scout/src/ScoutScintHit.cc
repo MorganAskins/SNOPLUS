@@ -18,7 +18,7 @@ ScoutScintHit::ScoutScintHit()
 
 ScoutScintHit::~ScoutScintHit(){}
 
-ScoutScintHit::ScoutScintHit(const ScoutScintHit&* right):G4VHit(right)
+ScoutScintHit::ScoutScintHit(const ScoutScintHit& right):G4VHit(right)
 {
   mEdep = right.mEdep;
   mPos = right.mPos;

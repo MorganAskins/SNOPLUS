@@ -21,4 +21,4 @@ void ScoutRunAction::BeginOfRunAction(const G4Run* aRun)
   G4cout << "### Run " << aRun->GetRunID() << " start." << G4endl;
 }
 
-void ScoutRunAction::EndOfRunAction(const G4Run* aRun){};
+void ScoutRunAction::EndOfRunAction(const G4Run* aRun){}

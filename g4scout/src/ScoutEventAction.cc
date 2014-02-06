@@ -1,7 +1,7 @@
 #include "ScoutEventAction.hh"
 #include "ScoutRunAction.hh"
 #include "ScoutPrimaryGeneratorAction.hh"
-#include "ScoutEventActionManager.hh"
+#include "ScoutEventActionMessenger.hh"
 
 #include "G4SystemOfUnits.hh"
 #include "G4Event.hh"
@@ -20,24 +20,24 @@ ScoutEventAction::ScoutEventAction(ScoutRunAction* runAction,
 				   ScoutPrimaryGeneratorAction* genAction)
   : mRunAction(runAction),mGeneratorAction(genAction)
 {
-  mActionManager = new ScoutEventActionManager(this);
+  mActionMessenger = new ScoutEventActionMessenger(this);
   // will add scout digitizer here
 }
 
 ScoutEventAction::~ScoutEventAction()
 {
-  delete ScoutEventActionManager;
+  delete mActionMessenger;
 }
 
-ScoutEventAction::BeginOfEventAction(const G4Event* event){}
+void ScoutEventAction::BeginOfEventAction(const G4Event*){}
 
-ScoutEventAction::EndOfEventAction(const G4Event* event)
+void ScoutEventAction::EndOfEventAction(const G4Event* event)
 {
   G4cout << "Processing event: " << event->GetEventID() << G4endl;
   FillRootEvent(1);
 }
 
-void ScoutEventAction::FillRootEvent(G4int evt)
+void ScoutEventAction::FillRootEvent(G4int)
 {
   return;
 }

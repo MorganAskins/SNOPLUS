@@ -40,7 +40,7 @@ ScoutParticleSourceMessenger::ScoutParticleSourceMessenger
   G4String candidateList;
   G4int nParticles = mParticleTable->entries();
   for(G4int i=0; i<nParticles; i++)
-    candidateList += particleTable->GetParticleName(i) + " ";
+    candidateList += mParticleTable->GetParticleName(i) + " ";
   mParticle->SetCandidates(candidateList);
 
   // particle direction
@@ -142,9 +142,9 @@ void ScoutParticleSourceMessenger::SetNewValue
 (G4UIcommand* command, G4String newValues)
 {
   if(command == mPositionType)
-    mParticleSource->SetPosType(newValues);
+    mParticleSource->SetSourceType(newValues);
   else if(command == mShape)
-    mParticleSource->SetPosShape(newValues);
+    mParticleSource->SetShape(newValues);
   else if(command == mCenter)
     mParticleSource->SetCenterCoords(mCenter->GetNew3VectorValue(newValues));
   else if(command == mHalfZ)
@@ -161,7 +161,7 @@ void ScoutParticleSourceMessenger::SetNewValue
     mParticleSource->SetParticleDefinition( mParticleTable->FindParticle(newValues));
   else if(command == mPosition)
   {
-    mParticleSource->SetPosType("Point");
+    mParticleSource->SetSourceType("Point");
     mParticleSource->SetCenterCoords(mPosition->GetNew3VectorValue(newValues));
   }
   else if(command == mDirection)

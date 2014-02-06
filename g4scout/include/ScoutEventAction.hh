@@ -23,7 +23,7 @@ class ScoutEventAction : public G4UserEventAction
 {
   ScoutRunAction* mRunAction;
   ScoutPrimaryGeneratorAction* mGeneratorAction;
-  ScoutEventActionManager* mActionManager;
+  ScoutEventActionMessenger* mActionMessenger;
 
 public:
   ScoutEventAction(ScoutRunAction*, ScoutPrimaryGeneratorAction*);
@@ -31,7 +31,7 @@ public:
 
   // inherited from G4UserEventAction
   void BeginOfEventAction(const G4Event*);
-  void EndOfEvenAction(const G4Event*);
+  void EndOfEventAction(const G4Event*);
 
   // Specific scout methods
   void FillRootEvent(G4int);

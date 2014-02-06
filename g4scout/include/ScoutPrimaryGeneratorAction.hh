@@ -9,7 +9,8 @@ class G4Event;
 
 class ScoutPrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 {
-  G4GeneralParticleSource* mParticleGun
+  //G4GeneralParticleSource* mParticleGun
+  ScoutParticleSource* mParticleGun;
   long mSeeds[2];
   G4double mPrimaryEnergy;
 

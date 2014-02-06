@@ -1,42 +1,4 @@
-// TODO: change this
-//
-// ********************************************************************
-// * License and Disclaimer                                           *
-// *                                                                  *
-// * The  Geant4 software  is  copyright of the Copyright Holders  of *
-// * the Geant4 Collaboration.  It is provided  under  the terms  and *
-// * conditions of the Geant4 Software License,  included in the file *
-// * LICENSE and available at  http://cern.ch/geant4/license .  These *
-// * include a list of copyright holders.                             *
-// *                                                                  *
-// * Neither the authors of this software system, nor their employing *
-// * institutes,nor the agencies providing financial support for this *
-// * work  make  any representation or  warranty, express or implied, *
-// * regarding  this  software system or assume any liability for its *
-// * use.  Please see the license in the file  LICENSE  and URL above *
-// * for the full disclaimer and the limitation of liability.         *
-// *                                                                  *
-// * This  code  implementation is the result of  the  scientific and *
-// * technical work of the GEANT4 collaboration.                      *
-// * By using,  copying,  modifying or  distributing the software (or *
-// * any work based  on the software)  you  agree  to acknowledge its *
-// * use  in  resulting  scientific  publications,  and indicate your *
-// * acceptance of all terms of the Geant4 Software license.          *
-// ********************************************************************
-//
-//
 // --------------------------------------------------------------
-//   GEANT 4 - Underground Dark Matter Detector Advanced Example
-//
-//      For information related to this code contact: Alex Howard
-//      e-mail: alexander.howard@cern.ch
-// --------------------------------------------------------------
-// Comments
-//
-//            Underground Advanced example main program
-//               by A. Howard and H. Araujo 
-//                    (27th November 2001)
-//
 // main program
 // --------------------------------------------------------------
 
@@ -53,15 +15,16 @@
 #include "G4UIExecutive.hh"
 #endif
 
-// TODO change to new header files
-#include "DMXAnalysisManager.hh"
-#include "DMXDetectorConstruction.hh"
-#include "DMXPhysicsList.hh"
-#include "DMXPrimaryGeneratorAction.hh"
-#include "DMXRunAction.hh"
-#include "DMXEventAction.hh"
-#include "DMXSteppingAction.hh"
-#include "DMXStackingAction.hh"
+// Scout Objects
+#include "ScoutDetectorConstruction.hh"
+//#include "ScoutPhysicsList.hh"
+#include "ScoutPrimaryGeneratorAction.hh"
+#include "ScoutRunAction.hh"
+#include "ScoutEventAction.hh"
+
+// Borrowed from WCSim
+#include "WCSimPhysicsListFactory.hh"
+#include "WCSimPhysicsList.hh"
 
 // STL objects
 #include <vector>
@@ -77,48 +40,31 @@ int main(int argc,char** argv) {
   G4RunManager * runManager = new G4RunManager;
 
   // set mandatory initialization classes (physics list and detector)
-  DMXDetectorConstruction* detector = new DMXDetectorConstruction;
-  runManager->SetUserInitialization(detector);
-  runManager->SetUserInitialization(new DMXPhysicsList);
+  ScoutDetectorConstruction* detector = new ScoutDetectorConstruction;
+  runManager->SetUserInitialization(detector);  
+  //runManager->SetUserInitialization(new ScoutPhysicsList);
+  WCSimPhysicsListFactory* physFactory = new WCSimPhysicsListFactory();
+  physFactory->InitializeList();
+  runManager->SetUserInitialization(physFactory);
   
 #ifdef G4VIS_USE
   // visualization manager
   G4VisManager* visManager = new G4VisExecutive;
   visManager->Initialize();
 #endif
-
-  // output environment variables:
-#ifdef G4ANALYSIS_USE
-  G4cout << G4endl << G4endl << G4endl 
-	 << " User Environment " << G4endl
-	 << " Using AIDA 3.2.1 analysis " << G4endl;
-#else
-  G4cout << G4endl << G4endl << G4endl 
-	 << " User Environment " << G4endl
-	 << " G4ANALYSIS_USE environment variable not set, NO ANALYSIS " 
-	 << G4endl;
-#endif
-
-#ifdef DMXENV_GPS_USE
-  G4cout << " Using GPS and not DMX gun " << G4endl;
-#else
-  G4cout << " Using the DMX gun " << G4endl;
-#endif
     
   // set user action classes
-  DMXPrimaryGeneratorAction* DMXGenerator = new DMXPrimaryGeneratorAction;
-  runManager->SetUserAction(DMXGenerator);
-  //  runManager->SetUserAction(new DMXPrimaryGeneratorAction);
-  // RunAction is inherited by EventAction for output filenames - will all
-  // change when implement proper analysis manager?
-  DMXRunAction* DMXRun = new DMXRunAction;
-  runManager->SetUserAction(DMXRun);
-  DMXEventAction* eventAction = new DMXEventAction(DMXRun,DMXGenerator);
+  ScoutPrimaryGeneratorAction* ScoutGenerator = new ScoutPrimaryGeneratorAction;
+  runManager->SetUserAction(ScoutGenerator);
+
+  ScoutRunAction* ScoutRun = new ScoutRunAction;
+  runManager->SetUserAction(ScoutRun);
+  ScoutEventAction* eventAction = new ScoutEventAction(ScoutRun,ScoutGenerator);
   runManager->SetUserAction(eventAction);
   // eventAction is inherited by SteppingAction in order to switch colour
   // flag:
-  runManager->SetUserAction(new DMXSteppingAction(eventAction));
-  runManager->SetUserAction(new DMXStackingAction);
+  //runManager->SetUserAction(new ScoutSteppingAction(eventAction));
+  // runManager->SetUserAction(new ScoutStackingAction);
 
   //Initialize G4 kernel
   runManager->Initialize();
@@ -132,7 +78,7 @@ int main(int argc,char** argv) {
 #ifdef G4UI_USE
       G4UIExecutive* ui = new G4UIExecutive(argc, argv);
 #ifdef G4VIS_USE
-      UImanager->ApplyCommand("/control/execute initInter.mac");     
+      UImanager->ApplyCommand("/control/execute macros/initInter.mac");     
 #endif
       ui->SessionStart();
       delete ui;
@@ -145,12 +91,6 @@ int main(int argc,char** argv) {
       G4String fileName = argv[1];
       UImanager->ApplyCommand(command+fileName);
     }
-
-  // job termination
-#ifdef G4ANALYSIS_USE  
-  DMXAnalysisManager::getInstance()->Finish(); 
-  G4cout << "Analysis files closed" << G4endl;
-#endif
 
 #ifdef G4VIS_USE
   if(visManager) delete visManager;

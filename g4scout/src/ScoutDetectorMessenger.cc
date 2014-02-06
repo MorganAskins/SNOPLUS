@@ -23,7 +23,7 @@ ScoutDetectorMessenger::~ScoutDetectorMessenger()
   //delete something;
 }
 
-void ScoutDetectorMessenger::SetNewValue(G4UIcommand* command
+void ScoutDetectorMessenger::SetNewValue(G4UIcommand* command,
 					 G4String newValue)
 {
   // if(command == something)

@@ -19,7 +19,7 @@ ScoutScintSD::ScoutScintSD(G4String name, ScoutDetectorConstruction* ScoutSD)
   collectionName.insert(HCname);
 }
 
-ScoutScintSD::~ScoutScintSD();
+ScoutScintSD::~ScoutScintSD(){}
 
 void ScoutScintSD::Initialize(G4HCofThisEvent*)
 {
@@ -62,7 +62,7 @@ void ScoutScintSD::EndOfEvent(G4HCofThisEvent* HCE)
 
   G4int nHits = mScintillatorCollection->entries();
   if(verboseLevel>=1)
-    G4cout << "  Scintillator Collection: " << nHits << " hits" <<< G4endl;
+    G4cout << "  Scintillator Collection: " << nHits << " hits" << G4endl;
   if(verboseLevel>=2)
     mScintillatorCollection->PrintAllHits();
 }

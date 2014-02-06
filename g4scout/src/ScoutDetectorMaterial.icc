@@ -3,12 +3,12 @@ G4double density,		// density
   z;				// atomic number
 G4String name,			// name
   symbol;			// symbol
-G4int ncompenents,		// number of compenents
-  iz,				// number of protons
-  ia;				// number of nucleons
-G4double abundance,		// abundance
-  temperature,			// temperature
-  pressure;			// pressure
+G4int ncomponents;		// number of compenents
+  //iz,				// number of protons
+  //ia;				// number of nucleons
+//G4double abundance,		// abundance
+//  temperature,			// temperature
+//  pressure;			// pressure
 
 // Matierals
 const G4int NUMENTRIES = 3;
@@ -22,14 +22,14 @@ quartz->AddElement(O, 2);
 // optical properties for quartz
 G4double quartz_PP[NUMENTRIES] = {5*eV, 6.69*eV, 7.5*eV}; // wavelengths range
 G4double quartz_RIND[NUMENTRIES] = {1.51, 1.57, 1.61};	  // refractive index
-G4double quartz_ABSL[NUMETNRIES] = {3*cm, 3*cm, 3*cm};	  // Absorption Length
+G4double quartz_ABSL[NUMENTRIES] = {3*cm, 3*cm, 3*cm};	  // Absorption Length
 G4MaterialPropertiesTable* quartz_mt = new G4MaterialPropertiesTable();
 quartz_mt->AddProperty("RINDEX", quartz_PP, quartz_RIND, NUMENTRIES);
 quartz_mt->AddProperty("ABSLENGTH", quartz_PP, quartz_ABSL, NUMENTRIES);
 quartz->SetMaterialPropertiesTable(quartz_mt);
 
 // aluminum
-G4Element* Al = new G4Element(name="Aluminum", symbol="Al", z=13, a=26.98);
+G4Element* Al = new G4Element(name="Aluminum", symbol="Al", z=13, a=26.98*g/mole);
 G4Material* metalAl = new G4Material(name="MetalAluminum", density=2.700*g/cm3, ncomponents=1);
 metalAl->AddElement(Al, 1);
 
@@ -37,7 +37,7 @@ metalAl->AddElement(Al, 1);
 G4Material* cathmetalAl = new G4Material(name="CathodeMetalAluminum", density=2.700*g/cm3, ncomponents=1);
 cathmetalAl->AddElement(Al, 1);
 
-G4double cathmetal_PP[NUMENTRIES] = {5*eV, 6.69eV, 7.5eV}; // wavelengths range
+G4double cathmetal_PP[NUMENTRIES] = {5*eV, 6.69*eV, 7.5*eV}; // wavelengths range
 G4double cathmetal_RIND[NUMENTRIES] = {1.51, 1.57, 1.61};  // refractive index
 G4double cathmetal_ABSL[NUMENTRIES] = {1e-20*m, 1e-20*m, 1e-20*m}; // Absorption Length
 G4MaterialPropertiesTable* cathmetal_mt = new G4MaterialPropertiesTable();
@@ -111,6 +111,6 @@ liquid_scintillator->SetMaterialPropertiesTable(scint_mt);
 
 world_mat = concrete;
 lab_mat = Air;
-target_mat = scintillator;
+target_mat = liquid_scintillator;
 pmt_mat = quartz;
 phcath_mat = cathmetalAl;

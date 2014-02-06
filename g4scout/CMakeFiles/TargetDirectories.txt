@@ -1,0 +1,2 @@
+/home/morgan/physics/snoplus/g4scout/CMakeFiles/SCOUT.dir
+/home/morgan/physics/snoplus/g4scout/CMakeFiles/Scout.dir

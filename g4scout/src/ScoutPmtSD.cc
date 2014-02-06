@@ -21,7 +21,7 @@ ScoutPmtSD::~ScoutPmtSD(){;}
 void ScoutPmtSD::Initialize(G4HCofThisEvent*)
 {
   mPmtCollection = new ScoutPmtHitsCollection(SensitiveDetectorName, collectionName[0]);
-  HitID = -1;
+  mHitID = -1;
 }
 
 G4bool ScoutPmtSD::ProcessHits(G4Step* aStep, G4TouchableHistory*)
@@ -29,7 +29,7 @@ G4bool ScoutPmtSD::ProcessHits(G4Step* aStep, G4TouchableHistory*)
   ScoutPmtHit* aPmtHit = new ScoutPmtHit();
   aPmtHit->SetPos(aStep->GetPostStepPoint()->GetPosition());
   aPmtHit->SetTime(aStep->GetPostStepPoint()->GetGlobalTime());
-  HitID=mPmtCollection->insert(aPmtHit);
+  mHitID=mPmtCollection->insert(aPmtHit);
 
   return true;
 }
@@ -43,7 +43,7 @@ void ScoutPmtSD::EndOfEvent(G4HCofThisEvent* HCE)
     HCID = G4SDManager::GetSDMpointer()->GetCollectionID(HCname);
   HCE->AddHitsCollection(HCID, mPmtCollection);
 
-  G4int nHits = mPmtCollection->entries();
+  //G4int nHits = mPmtCollection->entries();
 }
 
 void ScoutPmtSD::clear() {;}

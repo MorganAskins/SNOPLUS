@@ -26,5 +26,5 @@ void ScoutPrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   mSeeds[1] = *(CLHEP::HepRandom::getTheSeeds()+1);
 
   mParticleGun->GeneratePrimaryVertex(anEvent);
-  mPrimaryEnergy = particleGun->GetParticleEnergy();
+  mPrimaryEnergy = mParticleGun->GetParticleEnergy();
 }

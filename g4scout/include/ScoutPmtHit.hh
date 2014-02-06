@@ -35,7 +35,7 @@ public:
   inline void SetPos(G4ThreeVector vector){mPosition=vector;}
   inline G4ThreeVector GetPos() const {return mPosition;}
   inline void SetTime(G4double time){mTime = time;}
-  inline Grdouble GetTime(){return mTime;}
+  inline G4double GetTime(){return mTime;}
 
 };
 

@@ -16,7 +16,7 @@ ScoutPmtHit::ScoutPmtHit()
   mTime = 0;
 }
 
-ScoutPmtHit::~ScoutPmtHit(){};
+ScoutPmtHit::~ScoutPmtHit(){}
 
 ScoutPmtHit::ScoutPmtHit(const ScoutPmtHit& right) : G4VHit(right)
 {

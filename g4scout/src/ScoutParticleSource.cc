@@ -119,7 +119,7 @@ G4bool ScoutParticleSource::IsSourceConfined()
 
   // Check particle_position is within VolName
   G4VPhysicalVolume *theVolume;
-  theVolume=gNavigator->LocateGlobalPointAndSetup(mParticlePosition,ptr,true);
+  theVolume=mNavigator->LocateGlobalPointAndSetup(mParticlePosition,ptr,true);
   G4String theVolName = theVolume->GetName();
   if(theVolName == mVolName) {
   //   if(verbosityLevel >= 1)
@@ -130,7 +130,7 @@ G4bool ScoutParticleSource::IsSourceConfined()
     return(false);
 }
 
-void ConfineSourceToVolume(G4String vname)
+void ScoutParticleSource::ConfineSourceToVolume(G4String vname)
 {
   mVolName = vname;
   
@@ -160,11 +160,11 @@ void ConfineSourceToVolume(G4String vname)
   }
 }
 
-void ScoutParticleSource::GeneratoeIsotropicFlux()
+void ScoutParticleSource::GenerateIsotropicFlux()
 {
   G4double random1, random2;
   G4double px, py, pz;
-  G4doubel sintheta, sinphi, costheta, cosphi;
+  G4double sintheta, sinphi, costheta, cosphi;
 
   random1 = G4UniformRand();
   costheta = std::cos(mMinTheta) - random1*(std::cos(mMinTheta) - std::cos(mMaxTheta));
@@ -189,7 +189,7 @@ void ScoutParticleSource::GeneratoeIsotropicFlux()
   mParticleMomentum.setZ(pz);
 }
 
-void ScoutParticleSource::SetParticleDefinition(G4ParticleDefinition* defintion)
+void ScoutParticleSource::SetParticleDefinition(G4ParticleDefinition* definition)
 {
   mParticleDefinition = definition;
   mParticleCharge = definition->GetPDGCharge();
@@ -209,11 +209,11 @@ void ScoutParticleSource::GeneratePrimaryVertex(G4Event* event)
   G4bool sourceconf = false;
   G4int loopCount = 0;
 
-  while(sourceconf = false && (loopCount++)<10000)
+  while( (sourceconf = false) && (loopCount++ <10000))
   {
-    if(SourceType == "Point")
+    if(mSourceType == "Point")
       GeneratePointSource();
-    else if(SourceType == "Volume")
+    else if(mSourceType == "Volume")
       GeneratePointsInVolume();
     if(mConfine == true)
       sourceconf = IsSourceConfined();
@@ -238,7 +238,7 @@ void ScoutParticleSource::GeneratePrimaryVertex(G4Event* event)
 
   // TODO add verbosity and prints of particle information
   
-  Grdouble mass = mParticleDefinition->GetPDGMass();
+  G4double mass = mParticleDefinition->GetPDGMass();
   G4double energy = mParticleEnergy + mass;
   G4double pmom = std::sqrt(energy*energy - mass*mass);
   G4double p[3] = {pmom*mParticleMomentum.x(), pmom*mParticleMomentum.y(), 
@@ -257,3 +257,7 @@ void ScoutParticleSource::GeneratePrimaryVertex(G4Event* event)
   event->AddPrimaryVertex(vertex);
 }
     
+void ScoutParticleSource::GenerateMonoEnergetic()
+{
+  mParticleEnergy = mMonoEnergy;
+}
