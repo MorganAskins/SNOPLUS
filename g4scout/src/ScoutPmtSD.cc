@@ -12,7 +12,7 @@
 ScoutPmtSD::ScoutPmtSD(G4String name, ScoutDetectorConstruction* detector)
   :G4VSensitiveDetector(name), mScoutDetector(detector)
 {
-  G4String HCname = "pmtCollection";
+  G4String HCname = "mPmtCollection";
   collectionName.insert(HCname);
 }
 
@@ -43,7 +43,9 @@ void ScoutPmtSD::EndOfEvent(G4HCofThisEvent* HCE)
     HCID = G4SDManager::GetSDMpointer()->GetCollectionID(HCname);
   HCE->AddHitsCollection(HCID, mPmtCollection);
 
-  //G4int nHits = mPmtCollection->entries();
+  G4int nHits = mPmtCollection->entries();
+  if(verboseLevel>=1)
+    G4cout << "  PMT Collection: " << nHits << " hits" << G4endl;
 }
 
 void ScoutPmtSD::clear() {;}

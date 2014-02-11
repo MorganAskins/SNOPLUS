@@ -3,6 +3,15 @@
 cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 project(SCOUT)
 
+# for ROOT
+include(FindROOT.cmake)
+
+set(LINK DIRECTORIES
+	 ${ROOT_LIBRARY_DIR}
+)
+
+link_directories( ${LINK_DIRECTORIES})
+
 #----------------------------------------------------------------------------
 # Find Geant4 package, activating all available UI and Vis drivers by default
 # You can set WITH_GEANT4_UIVIS to OFF via the command line or ccmake/cmake-gui
@@ -37,6 +46,7 @@ endif()
 #
 include_directories(${PROJECT_SOURCE_DIR}/include 
                     ${Geant4_INCLUDE_DIR}
+		    ${ROOT_INCLUDE_DIR}
                     ${AIDA_INCLUDE_DIR})
 file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cc)
 file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)

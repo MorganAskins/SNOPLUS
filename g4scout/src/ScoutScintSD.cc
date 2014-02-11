@@ -15,7 +15,7 @@
 ScoutScintSD::ScoutScintSD(G4String name, ScoutDetectorConstruction* ScoutSD)
   :G4VSensitiveDetector(name), mScoutDetector(ScoutSD)
 {
-  G4String HCname="scintillatorCollection";
+  G4String HCname="mScintillatorCollection";
   collectionName.insert(HCname);
 }
 

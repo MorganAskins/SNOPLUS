@@ -112,7 +112,7 @@ ScoutParticleSourceMessenger::ScoutParticleSourceMessenger
   mAngType->SetCandidates("iso direction");
 
   // energy distribution
-  mEnergyType = new G4UIcmdWithAString("/dmx/gun/energytype",this);
+  mEnergyType = new G4UIcmdWithAString("/scout/gun/energytype",this);
   mEnergyType->SetGuidance("Sets energy distribution type");
   mEnergyType->SetGuidance("Possible variables are: Mono");
   mEnergyType->SetParameterName("EnergyDis",true,true);

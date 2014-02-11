@@ -8,6 +8,11 @@
 #include "ScoutScintHit.hh"
 #include "ScoutPmtHit.hh"
 
+#include "TTree.h"
+#include "TFile.h"
+
+class TTree;
+class TFile;
 class ScoutRunAction;
 class ScoutPrimaryGeneratorAction;
 class ScoutEventActionMessenger;
@@ -25,6 +30,8 @@ class ScoutEventAction : public G4UserEventAction
   ScoutPrimaryGeneratorAction* mGeneratorAction;
   ScoutEventActionMessenger* mActionMessenger;
 
+  TTree* mScoutTree;
+
 public:
   ScoutEventAction(ScoutRunAction*, ScoutPrimaryGeneratorAction*);
   ~ScoutEventAction();
@@ -32,6 +39,10 @@ public:
   // inherited from G4UserEventAction
   void BeginOfEventAction(const G4Event*);
   void EndOfEventAction(const G4Event*);
+
+  // Hits collection
+  G4int mScintillatorCollID;
+  G4int mPmtCollID;
 
   // Specific scout methods
   void FillRootEvent(G4int);
