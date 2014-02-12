@@ -29,6 +29,7 @@ void ScoutRunAction::BeginOfRunAction(const G4Run* aRun)
 
   // Event Tree
   TTree* tree = new TTree("ScoutTree", "Scout Data Tree");
+  tree->SetDirectory(hfile);
   SetTree(tree);
 
   tree->Branch("photoelectrons", &mPhotoelectrons, "photoelectrons/D");

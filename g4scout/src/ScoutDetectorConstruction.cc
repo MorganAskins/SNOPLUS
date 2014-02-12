@@ -44,10 +44,13 @@
 #include "G4RunManager.hh"
 
 #include "ScoutDetectorConstruction.hh"
+//#include "ScoutDetectorPmt.icc"
 
 ScoutDetectorConstruction::ScoutDetectorConstruction()
 {
   mDetectorMessenger = new ScoutDetectorMessenger(this);
+
+  InitVariables();
 }
 
 ScoutDetectorConstruction::~ScoutDetectorConstruction()
@@ -64,33 +67,10 @@ G4VPhysicalVolume* ScoutDetectorConstruction::Construct()
 {
   DefineMaterials();
 
-  // COLOURS ...
-  G4Colour  white   (1.0, 1.0, 1.0);
-  G4Colour  grey    (0.5, 0.5, 0.5);
-  G4Colour  lgrey   (.85, .85, .85);
-  G4Colour  red     (1.0, 0.0, 0.0);
-  G4Colour  blue    (0.0, 0.0, 1.0);
-  G4Colour  cyan    (0.0, 1.0, 1.0);
-  G4Colour  magenta (1.0, 0.0, 1.0); 
-  G4Colour  yellow  (1.0, 1.0, 0.0);
-  G4Colour  orange  (.75, .55, 0.0);
-  G4Colour  lblue   (0.0, 0.0, .75);
-  G4Colour  lgreen  (0.0, .75, 0.0);
-  G4Colour  green   (0.0, 1.0, 0.0);
-  G4Colour  brown   (0.7, 0.4, 0.1);
-
   // List of volumes are as follows (in order):
   // World, Target
   // Note: G4 Objects use radii (even for boxes)
 
-  const G4double targetDimensions[3] = {0.5*m, 0.5*m, 0.5*m};
-  const G4double labDimensions[3] = {targetDimensions[0] + 1*m,
-				     targetDimensions[1] + 1*m,
-				     targetDimensions[2] + 1*m };
-  const G4double worldDimensions[3] = {labDimensions[0] + 25*cm,
-				       labDimensions[1] + 25*cm,
-				       labDimensions[2] + 25*cm };
-  
   // This is the world the detector lives in
   G4Box* world_box = new G4Box("world_box", worldDimensions[0],
 			       worldDimensions[1], worldDimensions[2] );
@@ -118,18 +98,14 @@ G4VPhysicalVolume* ScoutDetectorConstruction::Construct()
 
   // Attributes of the Pmt's
   // Photomultipliers
-  G4double pmtHeight = 15*cm;
-  G4double pmtRadius = 10*cm;
-  G4double pmtOffset = 1*cm;
-  G4ThreeVector pmtPosition(0, 0, 0.5*pmtHeight + pmtOffset + targetDimensions[2]);
-  
   G4Sphere* pmt_window = new G4Sphere("pmt_sphere", 0*cm, 2*pmtRadius, 0*deg,
-				      360*deg, 0*deg, 30*deg);
+  				      360*deg, 0*deg, 30*deg);
   G4Tubs* pmt_tube = new G4Tubs("pmt_tube", 0*cm, pmtRadius, 0.5*pmtHeight,
-				0*deg, 360*deg);
-  G4UnionSolid* pmt_sol = new G4UnionSolid("pmt_sol", pmt_tube, pmt_window, 
-					   G4Transform3D(G4RotationMatrix(), G4ThreeVector(0, 0, 0.5*pmtHeight-
-											   2*pmtRadius*std::cos(30*deg))));
+  				0*deg, 360*deg);
+  G4UnionSolid* pmt_sol = new G4UnionSolid("pmt_sol", pmt_tube, pmt_window,
+  					   G4Transform3D(G4RotationMatrix(),
+							 G4ThreeVector(0, 0, 0.5*pmtHeight-
+								       2*pmtRadius*std::cos(30*deg))));
 
   mPmtLog = new G4LogicalVolume(pmt_sol, pmt_mat, "mPmtLog");
   mPmtPhys = new G4PVPlacement(0, pmtPosition, "mPmtPhys", mPmtLog, mLabPhys, false, 0);
@@ -142,23 +118,19 @@ G4VPhysicalVolume* ScoutDetectorConstruction::Construct()
   PmtVisAt->SetVisibility(true);
   mPmtLog->SetVisAttributes(PmtVisAt);
 
-  // Photocathode				    
+  // Photocathode
   G4double phcathVOffset = 0.5*pmtHeight-2*pmtRadius*std::cos(30*deg);
   G4double phcathVPosition = phcathVOffset;
 
   G4Sphere* phcath_sol = new G4Sphere("phcath_sphere", 2*pmtRadius-1.6*mm, 2*pmtRadius-1.59*mm, 0*deg, 360*deg,
-				      0*deg, 27*deg);
+  				      0*deg, 27*deg);
 
   mPhcathLog = new G4LogicalVolume(phcath_sol, phcath_mat, "mPhcathLog");
   mPhcathPhys = new G4PVPlacement(0, G4ThreeVector(0, 0, phcathVPosition),
-				  "mPhcathPhys", mPhcathLog, mPmtPhys, false, 0);
+  				  "mPhcathPhys", mPhcathLog, mPmtPhys, false, 0);
 
   //G4OpticalSurface* phcath_opsurf = new G4OpticalSurface("phcath_opsurf", unified, polished, dielectric_dielectric);
   //G4LogicalBorderSurface* phcath_surf = new G4LogicalBorderSurface("phcath_surf", mPmtPhys, mPhcathPhys, phcath_opsurf);
-
-  const G4int NUM = 2;
-  G4double phcath_PP[NUM]   = { 6.00*eV, 7.50*eV };
-  G4double phcath_REFL[NUM] = { 0.0, 0.0};
   G4MaterialPropertiesTable* phcath_mt = new G4MaterialPropertiesTable();
   phcath_mt->AddProperty("REFLECTIVITY", phcath_PP, phcath_REFL, NUM);
   //phcath_opsurf->SetMaterialPropertiesTable(phcath_mt);
@@ -167,6 +139,8 @@ G4VPhysicalVolume* ScoutDetectorConstruction::Construct()
   PhcathVisAt->SetForceSolid(true);
   PhcathVisAt->SetVisibility(true);
   mPhcathLog->SetVisAttributes(PhcathVisAt);
+
+  //ConstructPmt()
 
   // Sensitive Detectors
   G4SDManager* SDMan = G4SDManager::GetSDMpointer();
@@ -183,4 +157,47 @@ G4VPhysicalVolume* ScoutDetectorConstruction::Construct()
   mPhcathLog->SetSensitiveDetector(mPmtSD);
 
   return mWorldPhys;
+}
+
+void ScoutDetectorConstruction::InitVariables()
+{
+  // colors
+  white = G4Colour(1.0, 1.0, 1.0);
+  grey = G4Colour(0.5, 0.5, 0.5);
+  lgrey = G4Colour(.85, .85, .85);
+  red = G4Colour(1.0, 0.0, 0.0);
+  blue = G4Colour(0.0, 0.0, 1.0);
+  cyan = G4Colour(0.0, 1.0, 1.0);
+  magenta = G4Colour(1.0, 0.0, 1.0);
+  yellow = G4Colour(1.0, 1.0, 0.0);
+  orange = G4Colour(.75, .55, 0.0);
+  lblue = G4Colour(0.0, 0.0, .75);
+  lgreen = G4Colour(0.0, .75, 0.0);
+  green = G4Colour(0.0, 1.0, 0.0);
+  brown = G4Colour(0.7, 0.4, 0.1);
+
+  // dimensions
+  targetDimensions[0]=0.5*m;
+  targetDimensions[1]=0.5*m;
+  targetDimensions[2]=0.5*m;
+
+  labDimensions[0]=targetDimensions[0] + 1*m;
+  labDimensions[1]=targetDimensions[1] + 1*m;
+  labDimensions[2]=targetDimensions[2] + 1*m;
+
+  worldDimensions[0] = labDimensions[0] + 25*cm;
+  worldDimensions[1] = labDimensions[1] + 25*cm;
+  worldDimensions[2] = labDimensions[2] + 25*cm;
+
+  pmtHeight = 15*cm;
+  pmtRadius = 10*cm;
+  pmtOffset = 1*cm;
+  pmtPosition = G4ThreeVector(0, 0, 0.5*pmtHeight + pmtOffset + targetDimensions[2]);
+
+  NUM = 2;
+  phcath_PP[0] = 6.00*eV;
+  phcath_PP[1] = 7.50*eV;
+  phcath_REFL[0] = 0.0;
+  phcath_REFL[1] = 0.0;
+
 }
