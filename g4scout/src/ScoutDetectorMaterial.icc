@@ -103,7 +103,8 @@ scint_mt->AddProperty("RINDEX", scint_PP, scint_RIND, NUMENTRIES);
 scint_mt->AddProperty("ABSLENGTH", scint_PP, scint_ABSL, NUMENTRIES);
 scint_mt->AddConstProperty("SCINTILLATIONYIELD", 12000/MeV);
 scint_mt->AddConstProperty("RESOLUTIONSCALE", 1.0);
-scint_mt->AddConstProperty("FASTTIMECONSTANT", 20*ns);
+scint_mt->AddConstProperty("FASTTIMECONSTANT", 3.8*ns);
+scint_mt->AddConstProperty("SLOWTIMECONSTANT", 10.*ns);
 scint_mt->AddConstProperty("YIELDRATIO", 1.0);
 liquid_scintillator->SetMaterialPropertiesTable(scint_mt);
 
@@ -114,3 +115,4 @@ lab_mat = Air;
 target_mat = liquid_scintillator;
 pmt_mat = quartz;
 phcath_mat = cathmetalAl;
+//phcath_mat = quartz;

@@ -28,11 +28,11 @@
 //WCSimPhysicsList::WCSimPhysicsList():  G4VUserPhysicsList(), PhysicsMessenger(0)
 WCSimPhysicsList::WCSimPhysicsList():  G4VPhysicsConstructor(), PhysicsMessenger(0)
 {
- //defaultCutValue = 1.0*mm; //moved to WCSimPhysicsListFactory.cc
- SetVerboseLevel(1);
-
- PhysicsMessenger = new WCSimPhysicsMessenger(this);
-
+  //defaultCutValue = 1.0*mm; //moved to WCSimPhysicsListFactory.cc
+  SetVerboseLevel(1);
+  
+  PhysicsMessenger = new WCSimPhysicsMessenger(this);
+  
 }
 
 WCSimPhysicsList::~WCSimPhysicsList()
@@ -98,21 +98,21 @@ void WCSimPhysicsList::ConstructEM()
   //G4MultipleScattering class becomes obsolete and has to be removed and
   //replaced by new G4MultipleScattering classes for e+-, mu+-, hadron and ions.
   //K. Zbiri, 12/30/2009
-
+  
   theParticleIterator->reset();
   while( (*theParticleIterator)() ){
     G4ParticleDefinition* particle = theParticleIterator->value();
     G4ProcessManager* pmanager = particle->GetProcessManager();
     G4String particleName = particle->GetParticleName();
-     
+    
     if (particleName == "gamma") {
-    // gamma
+      // gamma
       pmanager->AddDiscreteProcess(new G4GammaConversion());
       pmanager->AddDiscreteProcess(new G4ComptonScattering());      
       pmanager->AddDiscreteProcess(new G4PhotoElectricEffect());
-
+      
     } else if (particleName == "e-") {
-    //electron
+      //electron
       // G4VProcess* theeminusMultipleScattering = new G4MultipleScattering();
       G4VProcess* theeminusMultipleScattering = new G4eMultipleScattering();
       G4VProcess* theeminusIonisation         = new G4eIonisation();
@@ -131,9 +131,9 @@ void WCSimPhysicsList::ConstructEM()
       pmanager->SetProcessOrdering(theeminusMultipleScattering, idxPostStep,1);
       pmanager->SetProcessOrdering(theeminusIonisation,         idxPostStep,2);
       pmanager->SetProcessOrdering(theeminusBremsstrahlung,     idxPostStep,3);
-
+      
     } else if (particleName == "e+") {
-    //positron
+      //positron
       // G4VProcess* theeplusMultipleScattering = new G4MultipleScattering();
       G4VProcess* theeplusMultipleScattering = new G4eMultipleScattering();
       G4VProcess* theeplusIonisation         = new G4eIonisation();
@@ -158,21 +158,52 @@ void WCSimPhysicsList::ConstructEM()
       pmanager->SetProcessOrdering(theeplusIonisation,         idxPostStep,2);
       pmanager->SetProcessOrdering(theeplusBremsstrahlung,     idxPostStep,3);
       pmanager->SetProcessOrdering(theeplusAnnihilation,       idxPostStep,4);
-
+      
     } else if( particleName == "mu+" ||
-               particleName == "mu-"    ) {
+      particleName == "mu-"    ) {
     //muon
-      //G4VProcess* aMultipleScattering = new G4MultipleScattering();
-       G4VProcess* aMultipleScattering = new G4MuMultipleScattering();
-       G4VProcess* aBremsstrahlung     = new G4MuBremsstrahlung();
-      G4VProcess* aPairProduction     = new G4MuPairProduction();
-      G4VProcess* anIonisation        = new G4MuIonisation();
+    //G4VProcess* aMultipleScattering = new G4MultipleScattering();
+    G4VProcess* aMultipleScattering = new G4MuMultipleScattering();
+    G4VProcess* aBremsstrahlung     = new G4MuBremsstrahlung();
+    G4VProcess* aPairProduction     = new G4MuPairProduction();
+    G4VProcess* anIonisation        = new G4MuIonisation();
+    //
+    // add processes
+    pmanager->AddProcess(anIonisation);
+    pmanager->AddProcess(aMultipleScattering);
+    pmanager->AddProcess(aBremsstrahlung);
+    pmanager->AddProcess(aPairProduction);
+    //
+    // set ordering for AlongStepDoIt
+    pmanager->SetProcessOrdering(aMultipleScattering, idxAlongStep,1);
+    pmanager->SetProcessOrdering(anIonisation,        idxAlongStep,2);
+    //
+    // set ordering for PostStepDoIt
+    pmanager->SetProcessOrdering(aMultipleScattering, idxPostStep,1);
+    pmanager->SetProcessOrdering(anIonisation,        idxPostStep,2);
+    pmanager->SetProcessOrdering(aBremsstrahlung,     idxPostStep,3);
+    pmanager->SetProcessOrdering(aPairProduction,     idxPostStep,4);
+    
+    // MF , stolen from CWW, april 2005
+    if (particleName == "mu-")
+    {
+      G4VProcess* aG4MuonMinusCaptureAtRest =
+      new G4MuonMinusCaptureAtRest();
+      pmanager->AddProcess(aG4MuonMinusCaptureAtRest);
+      pmanager->SetProcessOrdering(aG4MuonMinusCaptureAtRest,idxAtRest);
+    }
+    
+    
+      } else if ((!particle->IsShortLived()) &&
+      	(particle->GetPDGCharge() != 0.0)&&
+      (particle->GetParticleName() != "chargedgeantino")) {
+      // G4VProcess* aMultipleScattering = new G4MultipleScattering();
+      G4VProcess* aMultipleScattering = new G4hMultipleScattering();
+      G4VProcess* anIonisation        = new G4hIonisation();
       //
       // add processes
       pmanager->AddProcess(anIonisation);
       pmanager->AddProcess(aMultipleScattering);
-      pmanager->AddProcess(aBremsstrahlung);
-      pmanager->AddProcess(aPairProduction);
       //
       // set ordering for AlongStepDoIt
       pmanager->SetProcessOrdering(aMultipleScattering, idxAlongStep,1);
@@ -181,38 +212,7 @@ void WCSimPhysicsList::ConstructEM()
       // set ordering for PostStepDoIt
       pmanager->SetProcessOrdering(aMultipleScattering, idxPostStep,1);
       pmanager->SetProcessOrdering(anIonisation,        idxPostStep,2);
-      pmanager->SetProcessOrdering(aBremsstrahlung,     idxPostStep,3);
-      pmanager->SetProcessOrdering(aPairProduction,     idxPostStep,4);
-
-      // MF , stolen from CWW, april 2005
-      if (particleName == "mu-")
-        {
-          G4VProcess* aG4MuonMinusCaptureAtRest =
-            new G4MuonMinusCaptureAtRest();
-          pmanager->AddProcess(aG4MuonMinusCaptureAtRest);
-          pmanager->SetProcessOrdering(aG4MuonMinusCaptureAtRest,idxAtRest);
-        }
-
-
-    } else if ((!particle->IsShortLived()) &&
-	       (particle->GetPDGCharge() != 0.0)&&
-               (particle->GetParticleName() != "chargedgeantino")) {
-      // G4VProcess* aMultipleScattering = new G4MultipleScattering();
-     G4VProcess* aMultipleScattering = new G4hMultipleScattering();
-     G4VProcess* anIonisation        = new G4hIonisation();
-     //
-     // add processes
-     pmanager->AddProcess(anIonisation);
-     pmanager->AddProcess(aMultipleScattering);
-     //
-     // set ordering for AlongStepDoIt
-     pmanager->SetProcessOrdering(aMultipleScattering, idxAlongStep,1);
-     pmanager->SetProcessOrdering(anIonisation,        idxAlongStep,2);
-     //
-     // set ordering for PostStepDoIt
-     pmanager->SetProcessOrdering(aMultipleScattering, idxPostStep,1);
-     pmanager->SetProcessOrdering(anIonisation,        idxPostStep,2);
-    }
+      }
   }
 }
 
@@ -221,25 +221,25 @@ void WCSimPhysicsList::ConstructEM()
 #endif
 
 void WCSimPhysicsList::ConstructlArStepLimiter(){
-
-#ifdef GEANT4_7_0
+  
+  #ifdef GEANT4_7_0
   theParticleIterator->reset();
   while( (*theParticleIterator)() ){
-
+  	
     G4ParticleDefinition* particle = theParticleIterator->value();
     G4ProcessManager* pmanager = particle->GetProcessManager();
-
-     if ((!particle->IsShortLived()) &&
-	 (particle->GetPDGCharge() != 0.0)&&
-	 (particle->GetParticleName() != "chargedgeantino")) {
-       G4VProcess* stepLimiter = new G4StepLimiter();   
-       pmanager->AddProcess(stepLimiter);
-       pmanager->SetProcessOrdering(stepLimiter,
-				    idxPostStep,
-				    pmanager->GetProcessListLength());
-     }
+    
+    if ((!particle->IsShortLived()) &&
+      (particle->GetPDGCharge() != 0.0)&&
+    (particle->GetParticleName() != "chargedgeantino")) {
+    G4VProcess* stepLimiter = new G4StepLimiter();   
+    pmanager->AddProcess(stepLimiter);
+    pmanager->SetProcessOrdering(stepLimiter,
+      idxPostStep,
+      pmanager->GetProcessListLength());
+    }
   }
-#endif
+  #endif
 }
 
 #include "G4Cerenkov.hh"
@@ -248,20 +248,22 @@ void WCSimPhysicsList::ConstructlArStepLimiter(){
 #include "G4OpWLS.hh"
 #include "G4OpMieHG.hh"
 #include "G4OpBoundaryProcess.hh"
+#include "G4Scintillation.hh"
+
 
 void WCSimPhysicsList::ConstructOp(){
-
+  
   G4Cerenkov*           theCherenkovProcess        = new G4Cerenkov("Cerenkov");
   G4OpAbsorption*      theAbsorptionProcess         = new G4OpAbsorption();
   G4OpRayleigh*        theRayleighScatteringProcess = new G4OpRayleigh();
   G4OpWLS*              theWLSProcess                = new G4OpWLS();
   G4OpMieHG*  theMieHGScatteringProcess = new G4OpMieHG();
   G4OpBoundaryProcess* theBoundaryProcess          = new G4OpBoundaryProcess();
-
-//   theCherenkovProcess->DumpPhysicsTable();
-//   theAbsorptionProcess->DumpPhysicsTable();
-//   theRayleighScatteringProcess->DumpPhysicsTable();
-
+  
+  //   theCherenkovProcess->DumpPhysicsTable();
+  //   theAbsorptionProcess->DumpPhysicsTable();
+  //   theRayleighScatteringProcess->DumpPhysicsTable();
+  
   theCherenkovProcess->SetVerboseLevel(0);
   theAbsorptionProcess->SetVerboseLevel(0);
   theRayleighScatteringProcess->SetVerboseLevel(0);
@@ -270,19 +272,25 @@ void WCSimPhysicsList::ConstructOp(){
   theWLSProcess->SetVerboseLevel(0);
   
   theWLSProcess->UseTimeProfile("exponential");
-
+  
+  G4Scintillation* theScintillationProcess = new G4Scintillation("Scintillation");
+  theScintillationProcess->SetVerboseLevel(0);
+  theScintillationProcess->SetScintillationYieldFactor(1.);
+  theScintillationProcess->SetTrackSecondariesFirst(true); 
+  
+  
   G4int MaxNumPhotons = 300;
   theCherenkovProcess->SetTrackSecondariesFirst(true);
   theCherenkovProcess->SetMaxNumPhotonsPerStep(MaxNumPhotons);
-
+  
   // FROM N06 example:
   // theCherenkovProcess->SetMaxNumPhotonsPerStep(20);
   // theCherenkovProcess->SetMaxBetaChangePerStep(10.0);
   // theCherenkovProcess->SetTrackSecondariesFirst(true);
-
+  
   //G4OpticalSurfaceModel themodel = unified;
   //theBoundaryProcess->SetModel(themodel);
-
+  
   theParticleIterator->reset();
   while( (*theParticleIterator)() )
   {
@@ -292,23 +300,29 @@ void WCSimPhysicsList::ConstructOp(){
     
     /*  if (theCherenkovProcess->IsApplicable(*particle))
 	pmanager->AddContinuousProcess(theCherenkovProcess);*/
-
-     if (theCherenkovProcess->IsApplicable(*particle)) {
+	
+    if (theCherenkovProcess->IsApplicable(*particle)) {
       pmanager->AddProcess(theCherenkovProcess);
       pmanager->SetProcessOrdering(theCherenkovProcess,idxPostStep);
-      }
-    
+    }
+    if (theScintillationProcess->IsApplicable(*particle)) {
+      //G4cout << "Scintillation is turned on" << G4endl;
+      pmanager->AddProcess(theScintillationProcess);
+      pmanager->SetProcessOrderingToLast(theScintillationProcess, idxAtRest);
+      pmanager->SetProcessOrderingToLast(theScintillationProcess, idxPostStep);
+      
+    }
     
     if (particleName == "opticalphoton") 
-      {
-	pmanager->AddDiscreteProcess(theAbsorptionProcess);
-	//     G4cout << "warning direct light only\n";
-	pmanager->AddDiscreteProcess(theRayleighScatteringProcess);
-	pmanager->AddDiscreteProcess(theWLSProcess);
-	pmanager->AddDiscreteProcess(theMieHGScatteringProcess);
-	pmanager->AddDiscreteProcess(theBoundaryProcess);
-	
-      }
+    {
+      pmanager->AddDiscreteProcess(theAbsorptionProcess);
+      //     G4cout << "warning direct light only\n";
+      pmanager->AddDiscreteProcess(theRayleighScatteringProcess);
+      pmanager->AddDiscreteProcess(theWLSProcess);
+      pmanager->AddDiscreteProcess(theMieHGScatteringProcess);
+      pmanager->AddDiscreteProcess(theBoundaryProcess);
+      
+    }
   }
 }
 //---General construction
@@ -402,16 +416,16 @@ void WCSimPhysicsList::ConstructGeneral()
 
 void WCSimPhysicsList::ConstructHad() 
 {
-
-// Makes discrete physics processes for the hadrons, at present limited
-// to those particles with GHEISHA interactions (INTRC > 0).
-// The processes are: Elastic scattering and Inelastic scattering.
-// F.W.Jones  09-JUL-1998
-// 
-// This code stolen from:
-// examples/advanced/underground_physics/src/DMXPhysicsList.cc
-// CWW 2/23/05
-//
+  
+  // Makes discrete physics processes for the hadrons, at present limited
+  // to those particles with GHEISHA interactions (INTRC > 0).
+  // The processes are: Elastic scattering and Inelastic scattering.
+  // F.W.Jones  09-JUL-1998
+  // 
+  // This code stolen from:
+  // examples/advanced/underground_physics/src/DMXPhysicsList.cc
+  // CWW 2/23/05
+  //
   
   G4HadronElasticProcess* theElasticProcess = new G4HadronElasticProcess;
   G4LElastic* theElasticModel = new G4LElastic;
@@ -419,104 +433,104 @@ void WCSimPhysicsList::ConstructHad()
   
   theParticleIterator->reset();
   while ((*theParticleIterator)()) 
-    {
-      G4ParticleDefinition* particle = theParticleIterator->value();
-      G4ProcessManager* pmanager = particle->GetProcessManager();
-      G4String particleName = particle->GetParticleName();
-
-      if (particleName == "pi+") 
+  {
+  	G4ParticleDefinition* particle = theParticleIterator->value();
+  	G4ProcessManager* pmanager = particle->GetProcessManager();
+  	G4String particleName = particle->GetParticleName();
+  	
+  	if (particleName == "pi+") 
 	{
 	  pmanager->AddDiscreteProcess(theElasticProcess);
 	  G4PionPlusInelasticProcess* theInelasticProcess = 
-	    new G4PionPlusInelasticProcess();
+	  new G4PionPlusInelasticProcess();
 	  G4LEPionPlusInelastic* theLEInelasticModel = 
-	    new G4LEPionPlusInelastic;
+	  new G4LEPionPlusInelastic;
 	  theInelasticProcess->RegisterMe(theLEInelasticModel);
 	  G4HEPionPlusInelastic* theHEInelasticModel = 
-	    new G4HEPionPlusInelastic;
+	  new G4HEPionPlusInelastic;
 	  theInelasticProcess->RegisterMe(theHEInelasticModel);
 	  pmanager->AddDiscreteProcess(theInelasticProcess);
 	} 
-
-      else if (particleName == "pi-") 
+	
+	else if (particleName == "pi-") 
 	{
 	  pmanager->AddDiscreteProcess(theElasticProcess);
 	  G4PionMinusInelasticProcess* theInelasticProcess = 
-	    new G4PionMinusInelasticProcess();
+	  new G4PionMinusInelasticProcess();
 	  G4LEPionMinusInelastic* theLEInelasticModel = 
-	    new G4LEPionMinusInelastic;
+	  new G4LEPionMinusInelastic;
 	  theInelasticProcess->RegisterMe(theLEInelasticModel);
 	  G4HEPionMinusInelastic* theHEInelasticModel = 
-	    new G4HEPionMinusInelastic;
+	  new G4HEPionMinusInelastic;
 	  theInelasticProcess->RegisterMe(theHEInelasticModel);
 	  pmanager->AddDiscreteProcess(theInelasticProcess);
 	  G4String prcNam;
 	  pmanager->AddRestProcess(new G4PiMinusAbsorptionAtRest, ordDefault);
 	}
-      
-      else if (particleName == "kaon+") 
+	
+	else if (particleName == "kaon+") 
 	{
 	  pmanager->AddDiscreteProcess(theElasticProcess);
 	  G4KaonPlusInelasticProcess* theInelasticProcess = 
-	    new G4KaonPlusInelasticProcess();
+	  new G4KaonPlusInelasticProcess();
 	  G4LEKaonPlusInelastic* theLEInelasticModel = 
-	    new G4LEKaonPlusInelastic;
+	  new G4LEKaonPlusInelastic;
 	  theInelasticProcess->RegisterMe(theLEInelasticModel);
 	  G4HEKaonPlusInelastic* theHEInelasticModel = 
-	    new G4HEKaonPlusInelastic;
+	  new G4HEKaonPlusInelastic;
 	  theInelasticProcess->RegisterMe(theHEInelasticModel);
 	  pmanager->AddDiscreteProcess(theInelasticProcess);
 	}
-      
-      else if (particleName == "kaon0S") 
+	
+	else if (particleName == "kaon0S") 
 	{
 	  pmanager->AddDiscreteProcess(theElasticProcess);
 	  G4KaonZeroSInelasticProcess* theInelasticProcess = 
-	    new G4KaonZeroSInelasticProcess();
+	  new G4KaonZeroSInelasticProcess();
 	  G4LEKaonZeroSInelastic* theLEInelasticModel = 
-	    new G4LEKaonZeroSInelastic;
+	  new G4LEKaonZeroSInelastic;
 	  theInelasticProcess->RegisterMe(theLEInelasticModel);
 	  G4HEKaonZeroInelastic* theHEInelasticModel = 
-	    new G4HEKaonZeroInelastic;
+	  new G4HEKaonZeroInelastic;
 	  theInelasticProcess->RegisterMe(theHEInelasticModel);
 	  pmanager->AddDiscreteProcess(theInelasticProcess);
 	}
-
-      else if (particleName == "kaon0L") 
+	
+	else if (particleName == "kaon0L") 
 	{
 	  pmanager->AddDiscreteProcess(theElasticProcess);
 	  G4KaonZeroLInelasticProcess* theInelasticProcess = 
-	    new G4KaonZeroLInelasticProcess();
+	  new G4KaonZeroLInelasticProcess();
 	  G4LEKaonZeroLInelastic* theLEInelasticModel = 
-	    new G4LEKaonZeroLInelastic;
+	  new G4LEKaonZeroLInelastic;
 	  theInelasticProcess->RegisterMe(theLEInelasticModel);
 	  G4HEKaonZeroInelastic* theHEInelasticModel = 
-	    new G4HEKaonZeroInelastic;
+	  new G4HEKaonZeroInelastic;
 	  theInelasticProcess->RegisterMe(theHEInelasticModel);
 	  pmanager->AddDiscreteProcess(theInelasticProcess);
 	}
-
-      else if (particleName == "kaon-") 
+	
+	else if (particleName == "kaon-") 
 	{
 	  pmanager->AddDiscreteProcess(theElasticProcess);
 	  G4KaonMinusInelasticProcess* theInelasticProcess = 
-	    new G4KaonMinusInelasticProcess();
+	  new G4KaonMinusInelasticProcess();
 	  G4LEKaonMinusInelastic* theLEInelasticModel = 
-	    new G4LEKaonMinusInelastic;
+	  new G4LEKaonMinusInelastic;
 	  theInelasticProcess->RegisterMe(theLEInelasticModel);
 	  G4HEKaonMinusInelastic* theHEInelasticModel = 
-	    new G4HEKaonMinusInelastic;
+	  new G4HEKaonMinusInelastic;
 	  theInelasticProcess->RegisterMe(theHEInelasticModel);
 	  pmanager->AddDiscreteProcess(theInelasticProcess);
 	  pmanager->AddRestProcess(new G4KaonMinusAbsorptionAtRest, ordDefault);
 	}
-
-      else if (particleName == "proton") 
+	
+	else if (particleName == "proton") 
 	{
 	  pmanager->AddDiscreteProcess(theElasticProcess);
 	  G4ProtonInelasticProcess* theInelasticProcess = 
-	    new G4ProtonInelasticProcess();
-
+	  new G4ProtonInelasticProcess();
+	  
 	  
 	  //=================================
 	  // Added by JLR 2005-07-05
@@ -539,43 +553,43 @@ void WCSimPhysicsList::ConstructHad()
 	  else if (binaryhad) {
 	    G4BinaryCascade* theBinaryModel = new G4BinaryCascade();
 	    theInelasticProcess->RegisterMe(theBinaryModel);
-
+	    
 	    G4LEProtonInelastic* theLEInelasticModel = new G4LEProtonInelastic;
 	    theLEInelasticModel->SetMinEnergy(10.1*GeV);
 	    theLEInelasticModel->SetMaxEnergy( 45.*GeV );
 	    theInelasticProcess->RegisterMe(theLEInelasticModel);
-
+	    
 	  }
 	  else {
 	    G4cout << "No secondary interaction model chosen! Using G4 BINARY." << G4endl;
 	    G4BinaryCascade* theBinaryModel = new G4BinaryCascade();
 	    theInelasticProcess->RegisterMe(theBinaryModel);
 	  }
-
+	  
 	  G4HEProtonInelastic* theHEInelasticModel = new G4HEProtonInelastic;
 	  theInelasticProcess->RegisterMe(theHEInelasticModel);
 	  pmanager->AddDiscreteProcess(theInelasticProcess);
 	}
-
-      else if (particleName == "anti_proton") 
+	
+	else if (particleName == "anti_proton") 
 	{
 	  pmanager->AddDiscreteProcess(theElasticProcess);
 	  G4AntiProtonInelasticProcess* theInelasticProcess = 
-	    new G4AntiProtonInelasticProcess();
+	  new G4AntiProtonInelasticProcess();
 	  G4LEAntiProtonInelastic* theLEInelasticModel = 
-	    new G4LEAntiProtonInelastic;
+	  new G4LEAntiProtonInelastic;
 	  theInelasticProcess->RegisterMe(theLEInelasticModel);
 	  G4HEAntiProtonInelastic* theHEInelasticModel = 
-	    new G4HEAntiProtonInelastic;
+	  new G4HEAntiProtonInelastic;
 	  theInelasticProcess->RegisterMe(theHEInelasticModel);
 	  pmanager->AddDiscreteProcess(theInelasticProcess);
 	}
-
-      else if (particleName == "neutron") 
+	
+	else if (particleName == "neutron") 
 	{
 	  // elastic scattering
 	  G4HadronElasticProcess* theNeutronElasticProcess = 
-	    new G4HadronElasticProcess;
+	  new G4HadronElasticProcess;
 	  G4LElastic* theElasticModel1 = new G4LElastic;
 	  G4NeutronHPElastic * theElasticNeutron = new G4NeutronHPElastic;
 	  theNeutronElasticProcess->RegisterMe(theElasticModel1);
@@ -587,7 +601,7 @@ void WCSimPhysicsList::ConstructHad()
 	  
 	  // inelastic scattering
 	  G4NeutronInelasticProcess* theInelasticProcess =
-	    new G4NeutronInelasticProcess();
+	  new G4NeutronInelasticProcess();
 	  
 	  //=================================
 	  // Added by JLR 2005-07-05
@@ -613,11 +627,11 @@ void WCSimPhysicsList::ConstructHad()
 	    G4BinaryCascade* theBinaryModel = new G4BinaryCascade();
 	    theBinaryModel->SetMinEnergy(19*MeV);
 	    theInelasticProcess->RegisterMe(theBinaryModel);
-
-      G4LENeutronInelastic* theInelasticModel = new G4LENeutronInelastic;
-      theInelasticModel->SetMinEnergy(10.1*GeV);
-      theInelasticModel->SetMaxEnergy( 45.*GeV );
-      theInelasticProcess->RegisterMe(theInelasticModel);
+	    
+	    G4LENeutronInelastic* theInelasticModel = new G4LENeutronInelastic;
+	    theInelasticModel->SetMinEnergy(10.1*GeV);
+	    theInelasticModel->SetMaxEnergy( 45.*GeV );
+	    theInelasticProcess->RegisterMe(theInelasticModel);
 	  }
 	  else {
 	    G4cout << "No secondary interaction model chosen! Using G4 BINARY." << G4endl;
@@ -630,17 +644,17 @@ void WCSimPhysicsList::ConstructHad()
 	  theInelasticProcess->RegisterMe(theHEInelasticModel);
 	  
 	  G4NeutronHPInelastic * theLENeutronInelasticModel =
-	    new G4NeutronHPInelastic;
+	  new G4NeutronHPInelastic;
 	  theInelasticProcess->RegisterMe(theLENeutronInelasticModel);
 	  
 	  G4NeutronHPInelasticData * theNeutronData1 = 
-	    new G4NeutronHPInelasticData;
+	  new G4NeutronHPInelasticData;
 	  theInelasticProcess->AddDataSet(theNeutronData1);
 	  pmanager->AddDiscreteProcess(theInelasticProcess);
-
+	  
 	  // capture
 	  G4HadronCaptureProcess* theCaptureProcess =
-	    new G4HadronCaptureProcess;
+	  new G4HadronCaptureProcess;
 	  G4LCapture* theCaptureModel = new G4LCapture;
 	  theCaptureModel->SetMinEnergy(19*MeV);
 	  theCaptureProcess->RegisterMe(theCaptureModel);
@@ -652,55 +666,55 @@ void WCSimPhysicsList::ConstructHad()
 	  //  G4ProcessManager* pmanager = G4Neutron::Neutron->GetProcessManager();
 	  //  pmanager->AddProcess(new G4UserSpecialCuts(),-1,-1,1);
 	}
-
-      else if (particleName == "anti_neutron") 
+	
+	else if (particleName == "anti_neutron") 
 	{
 	  pmanager->AddDiscreteProcess(theElasticProcess);
 	  G4AntiNeutronInelasticProcess* theInelasticProcess = 
-	    new G4AntiNeutronInelasticProcess();
+	  new G4AntiNeutronInelasticProcess();
 	  G4LEAntiNeutronInelastic* theLEInelasticModel = 
-	    new G4LEAntiNeutronInelastic;
+	  new G4LEAntiNeutronInelastic;
 	  theInelasticProcess->RegisterMe(theLEInelasticModel);
 	  G4HEAntiNeutronInelastic* theHEInelasticModel = 
-	    new G4HEAntiNeutronInelastic;
+	  new G4HEAntiNeutronInelastic;
 	  theInelasticProcess->RegisterMe(theHEInelasticModel);
 	  pmanager->AddDiscreteProcess(theInelasticProcess);
 	}
-
-      else if (particleName == "deuteron") 
+	
+	else if (particleName == "deuteron") 
 	{
 	  pmanager->AddDiscreteProcess(theElasticProcess);
 	  G4DeuteronInelasticProcess* theInelasticProcess = 
-	    new G4DeuteronInelasticProcess();
+	  new G4DeuteronInelasticProcess();
 	  G4LEDeuteronInelastic* theLEInelasticModel = 
-	    new G4LEDeuteronInelastic;
+	  new G4LEDeuteronInelastic;
 	  theInelasticProcess->RegisterMe(theLEInelasticModel);
 	  pmanager->AddDiscreteProcess(theInelasticProcess);
 	}
-      
-      else if (particleName == "triton") 
+	
+	else if (particleName == "triton") 
 	{
 	  pmanager->AddDiscreteProcess(theElasticProcess);
 	  G4TritonInelasticProcess* theInelasticProcess = 
-	    new G4TritonInelasticProcess();
+	  new G4TritonInelasticProcess();
 	  G4LETritonInelastic* theLEInelasticModel = 
-	    new G4LETritonInelastic;
+	  new G4LETritonInelastic;
 	  theInelasticProcess->RegisterMe(theLEInelasticModel);
 	  pmanager->AddDiscreteProcess(theInelasticProcess);
 	}
-
-      else if (particleName == "alpha") 
+	
+	else if (particleName == "alpha") 
 	{
 	  pmanager->AddDiscreteProcess(theElasticProcess);
 	  G4AlphaInelasticProcess* theInelasticProcess = 
-	    new G4AlphaInelasticProcess();
+	  new G4AlphaInelasticProcess();
 	  G4LEAlphaInelastic* theLEInelasticModel = 
-	    new G4LEAlphaInelastic;
+	  new G4LEAlphaInelastic;
 	  theInelasticProcess->RegisterMe(theLEInelasticModel);
 	  pmanager->AddDiscreteProcess(theInelasticProcess);
 	}
-
-    }
+	
+  }
 }
 
 //=================================
@@ -715,7 +729,7 @@ void WCSimPhysicsList::ConstructHad()
 void WCSimPhysicsList::SetSecondaryHad(G4String hadval)
 {
   SecondaryHadModel = hadval;
-
+  
   if (SecondaryHadModel == "GHEISHA") {
     G4cout << "Secondary interaction model set to GHEISHA" << G4endl;
     gheishahad = true;
@@ -736,31 +750,31 @@ void WCSimPhysicsList::SetSecondaryHad(G4String hadval)
   }
   else {
     G4cout << "Secondary interaction model " << SecondaryHadModel
-	   << " is not a valid choice. BINARY model will be used." << G4endl;
+    << " is not a valid choice. BINARY model will be used." << G4endl;
     gheishahad = false;
     bertinihad = false;
     binaryhad  = true;
   }
-
-
+  
+  
 }
 
 //----set cut values----
 /* Setting cuts occurs in WCSimPhysicsListFactory.cc
 void WCSimPhysicsList::SetCuts()
 {
-  if (verboseLevel >0){
-    G4cout << "WCSimPhysicsList::SetCuts:";
-    G4cout << "CutLength : " << G4BestUnit(defaultCutValue,"Length") << G4endl;
-  }
+if (verboseLevel >0){
+G4cout << "WCSimPhysicsList::SetCuts:";
+G4cout << "CutLength : " << G4BestUnit(defaultCutValue,"Length") << G4endl;
+}
 
-  // set cut values for gamma at first and for e- second and next for e+,
-  // because some processes for e+/e- need cut values for gamma
-  //
-  SetCutValue(defaultCutValue, "gamma");
-  SetCutValue(defaultCutValue, "e-");
-  SetCutValue(defaultCutValue, "e+");
+// set cut values for gamma at first and for e- second and next for e+,
+// because some processes for e+/e- need cut values for gamma
+//
+SetCutValue(defaultCutValue, "gamma");
+SetCutValue(defaultCutValue, "e-");
+SetCutValue(defaultCutValue, "e+");
 
-  if (verboseLevel>0) DumpCutValuesTable();
+if (verboseLevel>0) DumpCutValuesTable();
 }
 */

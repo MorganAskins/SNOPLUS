@@ -60,7 +60,6 @@ int main(int argc,char** argv) {
   ScoutRunAction* ScoutRun = new ScoutRunAction;
   runManager->SetUserAction(ScoutRun);
   ScoutEventAction* eventAction = new ScoutEventAction(ScoutRun,ScoutGenerator);
-  G4cout << "Process this LINE!!!" << G4endl;
   runManager->SetUserAction(eventAction);
   // eventAction is inherited by SteppingAction in order to switch colour
   // flag:

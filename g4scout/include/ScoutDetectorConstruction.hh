@@ -38,6 +38,7 @@ class ScoutDetectorConstruction : public G4VUserDetectorConstruction
   ScoutPmtSD* mPmtSD;
   void DefineMaterials();	///< Setup the materials list
   void ConstructPmt();		///< Build array of Pmts
+  void PlacePmts();
   ScoutDetectorMessenger* mDetectorMessenger;
   void InitVariables();
   
@@ -83,9 +84,13 @@ private:			// Materials, volumes, variables
   G4double targetDimensions[3];
   G4double labDimensions[3];
   G4double worldDimensions[3];
+
+  // pmt properties
+  G4double pmtExposure;
   G4double pmtHeight;
   G4double pmtRadius;
   G4double pmtOffset;
+  G4double pmtGlassThickness;
   G4ThreeVector pmtPosition;
 
   G4int NUM;
