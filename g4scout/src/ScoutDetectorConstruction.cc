@@ -85,18 +85,61 @@ G4VPhysicalVolume* ScoutDetectorConstruction::Construct()
   mLabPhys = new G4PVPlacement(0, G4ThreeVector(0, 0, 0),
 			       "mLabPhys", mLabLog, mWorldPhys, false, 0);
 
-  // Detector Assembly:
+  ///////Detector Assembly////////////
+  // Lead Shield
+  G4Box* lead_box = new G4Box("lead_box", leadDimensions[0], 
+			      leadDimensions[1], leadDimensions[2]);
+  mLeadLog = new G4LogicalVolume(lead_box, lead_mat, "mLeadLog");
+  mLeadPhys = new G4PVPlacement(0, G4ThreeVector(0, 0, 0),
+				"mLeadPhys", mLeadLog, mLabPhys, false, 0);
+  G4VisAttributes* LeadVisAt = new G4VisAttributes(grey);
+  LeadVisAt->SetVisibility(true);
+  mLeadLog->SetVisAttributes(LeadVisAt);
+  
+  // Borated Polyethylene Shield
+  G4Box* bpoly_box = new G4Box("bpoly_box", bpolyDimensions[0], 
+			       bpolyDimensions[1], bpolyDimensions[2]);
+  mBpolyLog = new G4LogicalVolume(bpoly_box, boratedpoly_mat, "mBpolyLog");
+  mBpolyPhys = new G4PVPlacement(0, G4ThreeVector(0, 0, 0),
+				 "mBpolyPhys", mBpolyLog, mLeadPhys, false, 0);
+  G4VisAttributes* BpolyVisAt = new G4VisAttributes(magenta);
+  BpolyVisAt->SetVisibility(true);
+  mBpolyLog->SetVisAttributes(BpolyVisAt);
+
+  // Copper Shield
+  G4Box* copper_box = new G4Box("copper_box", copperDimensions[0], 
+				copperDimensions[1], copperDimensions[2]);
+  mCopperLog = new G4LogicalVolume(copper_box, copper_mat, "mCopperLog");
+  mCopperPhys = new G4PVPlacement(0, G4ThreeVector(0, 0, 0),
+				  "mCopperPhys", mCopperLog, mBpolyPhys, false, 0);
+  G4VisAttributes* CopperVisAt = new G4VisAttributes(orange);
+  CopperVisAt->SetVisibility(true);
+  mCopperLog->SetVisAttributes(CopperVisAt);
+
+  // Acrylic Vessel
+  G4Box* acrylic_box = new G4Box("acrylic_box", acrylicDimensions[0], 
+				 acrylicDimensions[1], acrylicDimensions[2]);
+  mAcrylicLog = new G4LogicalVolume(acrylic_box, acrylic_mat, "mAcrylicLog");
+  mAcrylicPhys = new G4PVPlacement(0, G4ThreeVector(0, 0, 0),
+				   "mAcrylicPhys", mAcrylicLog, mCopperPhys, false, 0);
+  G4VisAttributes* AcrylicVisAt = new G4VisAttributes(white);
+  AcrylicVisAt->SetVisibility(true);
+  mAcrylicLog->SetVisAttributes(AcrylicVisAt);
+
+  // Target Scintillator
   G4Box* target_box = new G4Box("target_box", targetDimensions[0],
 				targetDimensions[1], targetDimensions[2]);
   mTargetLog = new G4LogicalVolume(target_box, target_mat, "mTargetLog");
   mTargetPhys = new G4PVPlacement(0, G4ThreeVector(0, 0, 0),
-				    "mTargetPhys", mTargetLog, mLabPhys, false, 0);
-  G4VisAttributes* TargetVisAt = new G4VisAttributes(cyan);
+				  "mTargetPhys", mTargetLog, mAcrylicPhys, false, 0);
+  G4VisAttributes* TargetVisAt = new G4VisAttributes(blue);
   TargetVisAt->SetVisibility(true);
   mTargetLog->SetVisAttributes(TargetVisAt);
 
   ConstructPmt();
   PlacePmts();
+
+
 
   // Sensitive Detectors
   G4SDManager* SDMan = G4SDManager::GetSDMpointer();
@@ -118,9 +161,9 @@ G4VPhysicalVolume* ScoutDetectorConstruction::Construct()
 
 void ScoutDetectorConstruction::ConstructPmt()
 {
-  // Attributes of the Pmt's
+  // Pmt Holders
+
   // Photomultipliers
-  //pmtRadius*=1/(std::sin(30*deg));
 
   G4Sphere* pmt_window = new G4Sphere("pmt_sphere", 0, 2*pmtRadius, 0*deg,
   				      360*deg, 0*deg, 30*deg);
@@ -170,66 +213,36 @@ void ScoutDetectorConstruction::ConstructPmt()
 
 void ScoutDetectorConstruction::PlacePmts()
 {
-  // Place nine per side
+  G4Box* pmtholder_box = new G4Box("pmtholder_box", pmtHolderDimensions[0],
+				   pmtHolderDimensions[1], pmtHolderDimensions[2]);
+  mPmtHolderLog = new G4LogicalVolume(pmtholder_box, pmtholder_mat, "mPmtHolderLog");
+  // Place nine per side inside their pmt holders
   for(int side=0; side<2; side++)
     for(int row=0; row<3; row++)
       for(int col=0; col<3; col++)
       {
 	G4RotationMatrix* pmtdirection = new G4RotationMatrix(0*deg, (1-side)*180*deg, 0);
-	G4double phcathVOffset = 0.5*pmtHeight-2*pmtRadius*std::cos(30*deg);
+	G4ThreeVector pmtPosition( (row-1)*(acrylicDimensions[0]*(2./3)), 
+				   (col-1)*(acrylicDimensions[1]*(2./3)), 
+				   pow(-1,side)*(acrylicDimensions[2]+pmtHolderDimensions[2]));
 
-	pmtPosition = G4ThreeVector((row-1)*(targetDimensions[0]*(2./3)), 
-				    (col-1)*(targetDimensions[1]*(2./3)), 
-				    pow(-1,side)*(0.5*pmtHeight + pmtOffset + targetDimensions[2]));
-	
-	mPmtPhys = new G4PVPlacement(pmtdirection, pmtPosition, "mPmtPhys", mPmtLog, mLabPhys, false, 0);
-	mPhcathPhys = new G4PVPlacement(0, G4ThreeVector(0, 0, phcathVOffset),
-					"mPhcathPhys", mPhcathLog, mPmtPhys, false, 0);
+	mPmtHolderPhys = new G4PVPlacement(pmtdirection, pmtPosition, "mPmtHolderPhys",
+					   mPmtHolderLog, mCopperPhys, false, 0);
       }
+  G4double phcathVOffset = 0.5*pmtHeight-2*pmtRadius*std::cos(30*deg);
+  G4Box* pmtholderfill_box = new G4Box("pmtholderfill_box", pmtHolderFillDimensions[0],
+				       pmtHolderFillDimensions[1], pmtHolderFillDimensions[2]);
+  mPmtHolderFillLog = new G4LogicalVolume(pmtholderfill_box, pmtholderfill_mat, "mPmtHolderFillLog");
+  mPmtHolderFillPhys = new G4PVPlacement(0, G4ThreeVector(0, 0, 0), "mPmtHolderFillPhys",
+					 mPmtHolderFillLog, mPmtHolderPhys, false, 0);
+
+  mPmtPhys = new G4PVPlacement(0, G4ThreeVector(0, 0, -pmtStandOff), "mPmtPhys", 
+			       mPmtLog, mPmtHolderFillPhys, false, 0);
+  mPhcathPhys = new G4PVPlacement(0, G4ThreeVector(0, 0, phcathVOffset),
+				  "mPhcathPhys", mPhcathLog, mPmtPhys, false, 0);
   return;
 }
 
 void ScoutDetectorConstruction::InitVariables()
 {
-  // colors
-  white = G4Colour(1.0, 1.0, 1.0);
-  grey = G4Colour(0.5, 0.5, 0.5);
-  lgrey = G4Colour(.85, .85, .85);
-  red = G4Colour(1.0, 0.0, 0.0);
-  blue = G4Colour(0.0, 0.0, 1.0);
-  cyan = G4Colour(0.0, 1.0, 1.0);
-  magenta = G4Colour(1.0, 0.0, 1.0);
-  yellow = G4Colour(1.0, 1.0, 0.0);
-  orange = G4Colour(.75, .55, 0.0);
-  lblue = G4Colour(0.0, 0.0, .75);
-  lgreen = G4Colour(0.0, .75, 0.0);
-  green = G4Colour(0.0, 1.0, 0.0);
-  brown = G4Colour(0.7, 0.4, 0.1);
-
-  // dimensions
-  targetDimensions[0]=0.5*m;
-  targetDimensions[1]=0.5*m;
-  targetDimensions[2]=0.5*m;
-
-  labDimensions[0]=targetDimensions[0] + 1*m;
-  labDimensions[1]=targetDimensions[1] + 1*m;
-  labDimensions[2]=targetDimensions[2] + 1*m;
-
-  worldDimensions[0] = labDimensions[0] + 25*cm;
-  worldDimensions[1] = labDimensions[1] + 25*cm;
-  worldDimensions[2] = labDimensions[2] + 25*cm;
-
-  pmtExposure = 18*cm;
-  pmtHeight = 15*cm;
-  pmtRadius = 10*cm;
-  pmtOffset = 1*cm;
-  pmtGlassThickness = 5*mm;
-  pmtPosition = G4ThreeVector(0, 0, 0.5*pmtHeight + pmtOffset + targetDimensions[2]);
-
-  NUM = 2;
-  phcath_PP[0] = 6.00*eV;
-  phcath_PP[1] = 7.50*eV;
-  phcath_REFL[0] = 0.0;
-  phcath_REFL[1] = 0.0;
-
 }

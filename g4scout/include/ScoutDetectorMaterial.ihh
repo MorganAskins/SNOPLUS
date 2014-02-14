@@ -2,6 +2,12 @@
 
 G4Material* world_mat;
 G4Material* lab_mat;
+G4Material* lead_mat;
+G4Material* copper_mat;
+G4Material* boratedpoly_mat;
+G4Material* acrylic_mat;
+G4Material* pmtholder_mat;
+G4Material* pmtholderfill_mat;
 G4Material* target_mat;
 G4Material* pmt_mat;
 G4Material* phcath_mat;

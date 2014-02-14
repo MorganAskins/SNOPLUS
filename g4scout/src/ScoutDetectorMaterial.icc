@@ -112,7 +112,12 @@ liquid_scintillator->SetMaterialPropertiesTable(scint_mt);
 
 world_mat = concrete;
 lab_mat = Air;
+lead_mat = metalPb;
+copper_mat = metalCu;
+boratedpoly_mat = G4Material::GetMaterial("Borated Polyethyl.");
+acrylic_mat = G4Material::GetMaterial("Plexiglass"); // Change to acrylic
+pmtholder_mat = G4Material::GetMaterial("Plexiglass"); // Change to acrylic
+pmtholderfill_mat = G4Material::GetMaterial("Water");
 target_mat = liquid_scintillator;
 pmt_mat = quartz;
 phcath_mat = cathmetalAl;
-//phcath_mat = quartz;

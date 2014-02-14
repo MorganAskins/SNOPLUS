@@ -3,7 +3,7 @@
 # GNUmakefile for examples module.  Gabriele Cosmo, 06/04/98.
 # --------------------------------------------------------------
 
-G4DEBUG = 1
+G4DEBUG = 0
 
 name := Scout
 G4TARGET := $(name)
@@ -39,6 +39,8 @@ CPPFLAGS  += -I$(ROOTSYS)/include $(ROOTCFLAGS)
 EXTRALIBS += $(ROOTLIBS)
 
 EXTRA_LINK_DEPENDENCIES := 
+
+CPPFLAGS += -std=c++11
 
 .PHONY: all
 all: lib bin
