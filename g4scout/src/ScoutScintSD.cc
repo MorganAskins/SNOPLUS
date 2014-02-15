@@ -37,8 +37,8 @@ G4bool ScoutScintSD::ProcessHits(G4Step* aStep, G4TouchableHistory*)
   if(particleType->GetPDGCharge() != 0)
     stepl = aStep->GetStepLength();
 
-  G4VPhysicalVolume* particleVolume = aStep->GetTrack()->GetNextVolume();
-  if( particleVolume->GetName() != "mLabPhys" ) return false;
+  // G4VPhysicalVolume* particleVolume = aStep->GetTrack()->GetNextVolume();
+  // if( particleVolume->GetName() != "mLabPhys" ) return false;
 
   //if ((edep==0)&&(stepl==0)) return false;
   // Only care about photons
