@@ -76,6 +76,7 @@ G4Material* Air = new G4Material("AIR", 1.2929*kg/m3, 2, kStateGas, 300*kelvin, 
 Air->AddElement(N, 0.8);
 Air->AddElement(O, 0.2);
 
+
 // concrete
 G4Element* H = new G4Element(name="Hydrogen",symbol="H" , z= 1., a=1.00794*g/mole);
 G4Element* Ca = new G4Element(name="Calcium",symbol="Ca" , z= 20., a=40.078*g/mole);
@@ -101,32 +102,134 @@ G4Material* acrylic = new G4Material(name="Acrylic", density=1.18*g/cm3, ncompon
 acrylic->AddElement(C, 5);
 acrylic->AddElement(O, 2);
 acrylic->AddElement(H, 8);
-
+const int NUMENTRIES_acrylic=40;
+G4double acrylic_PP[NUMENTRIES_acrylic];
+G4double acrylic_RIND[NUMENTRIES_acrylic];
+// Adding a parametrized acrylic
+G4double acrylic_param[4]={1760.701, -1.3687, 2.4388e-3, -1.5178e-6};
+for(int i=0; i<NUMENTRIES_acrylic; i++)
+{
+  acrylic_PP[i]=(6-1.5)/NUMENTRIES_acrylic*i+1.5;
+  acrylic_RIND[i] = 0;
+  for(int j=0; j<4; j++)
+    acrylic_RIND[i]+=acrylic_param[j]/1000.0*std::pow(h_Planck*c_light/acrylic_PP[i]/nm,j); 
+// goes like power law in lambda
+}
+// Tecacryl 2 TODO
+const int NUMENTRIES_acrylic_abs=5;
+G4double acrylic_PP_abs[NUMENTRIES_acrylic_abs]=
+{ 1.963*eV, 2.284*eV, 2.820*eV, 3.063*eV, 3.309*eV };
+G4double acrylic_ABSL[NUMENTRIES_acrylic_abs]=
+{ 10.8*m, 10.1*m, 1.68*m, 0.35*m, 0.12*m };
+G4MaterialPropertiesTable* acrylic_mt = new G4MaterialPropertiesTable();
+acrylic_mt->AddProperty("RINDEX", acrylic_PP, acrylic_RIND, NUMENTRIES_acrylic);
+acrylic_mt->AddProperty("ABSLENGTH", acrylic_PP_abs, acrylic_ABSL, NUMENTRIES_acrylic_abs);
 // water
 G4Material* water = new G4Material(name="Water", density=1.00*g/cm3, ncomponents=2);
 water->AddElement(H, 2);
 water->AddElement(O, 1);
+//From SFDETSIM water absorption
+const G4int NUMENTRIES_water=100;
+
+G4double water_PP[NUMENTRIES_water] =
+{ 
+  1.56962*eV, 1.58974*eV, 1.61039*eV, 1.63157*eV, 
+  1.65333*eV, 1.67567*eV, 1.69863*eV, 1.72222*eV, 
+  1.74647*eV, 1.77142*eV, 1.7971*eV, 1.82352*eV, 
+  1.85074*eV, 1.87878*eV, 1.90769*eV, 1.93749*eV, 
+  1.96825*eV, 1.99999*eV, 2.03278*eV, 2.06666*eV,
+  2.10169*eV, 2.13793*eV, 2.17543*eV, 2.21428*eV, 
+  2.25454*eV, 2.29629*eV, 2.33962*eV, 2.38461*eV, 
+  2.43137*eV, 2.47999*eV, 2.53061*eV, 2.58333*eV, 
+  2.63829*eV, 2.69565*eV, 2.75555*eV, 2.81817*eV, 
+  2.88371*eV, 2.95237*eV, 3.02438*eV, 3.09999*eV,
+  3.17948*eV, 3.26315*eV, 3.35134*eV, 3.44444*eV, 
+  3.54285*eV, 3.64705*eV, 3.75757*eV, 3.87499*eV, 
+  3.99999*eV, 4.13332*eV, 4.27585*eV, 4.42856*eV, 
+  4.59258*eV, 4.76922*eV, 4.95999*eV, 5.16665*eV, 
+  5.39129*eV, 5.63635*eV, 5.90475*eV, 6.19998*eV 
+};
+
+G4double water_RIND[NUMENTRIES_water] = 
+{
+  1.32885, 1.32906, 1.32927, 1.32948, 1.3297, 1.32992, 1.33014, 
+  1.33037, 1.3306, 1.33084, 1.33109, 1.33134, 1.3316, 1.33186, 1.33213,
+  1.33241, 1.3327, 1.33299, 1.33329, 1.33361, 1.33393, 1.33427, 1.33462,
+  1.33498, 1.33536, 1.33576, 1.33617, 1.3366, 1.33705, 1.33753, 1.33803,
+  1.33855, 1.33911, 1.3397, 1.34033, 1.341, 1.34172, 1.34248, 1.34331,
+  1.34419, 1.34515, 1.3462, 1.34733, 1.34858, 1.34994, 1.35145, 1.35312,
+  1.35498, 1.35707, 1.35943, 1.36211, 1.36518, 1.36872, 1.37287, 1.37776,
+  1.38362, 1.39074, 1.39956, 1.41075, 1.42535
+};
+G4double water_ABSL[NUMENTRIES_water] =
+{
+  16.1419*cm,  18.278*cm, 21.0657*cm, 24.8568*cm, 30.3117*cm, 
+  38.8341*cm, 54.0231*cm, 81.2306*cm, 120.909*cm, 160.238*cm, 
+  193.771*cm, 215.017*cm, 227.747*cm,  243.85*cm, 294.036*cm, 
+  321.647*cm,  342.81*cm, 362.827*cm, 378.041*cm, 449.378*cm,
+  739.434*cm, 1114.23*cm, 1435.56*cm, 1611.06*cm, 1764.18*cm, 
+  2100.95*cm,  2292.9*cm, 2431.33*cm,  3053.6*cm, 4838.23*cm, 
+  6539.65*cm, 7682.63*cm, 9137.28*cm, 12220.9*cm, 15270.7*cm, 
+  19051.5*cm, 23671.3*cm, 29191.1*cm, 35567.9*cm,   42583*cm,
+  49779.6*cm, 56465.3*cm,   61830*cm, 65174.6*cm, 66143.7*cm,   
+  64820*cm,   61635*cm, 57176.2*cm, 52012.1*cm, 46595.7*cm, 
+  41242.1*cm, 36146.3*cm, 31415.4*cm, 27097.8*cm, 23205.7*cm, 
+  19730.3*cm, 16651.6*cm, 13943.6*cm, 11578.1*cm, 9526.13*cm
+};
+
+G4MaterialPropertiesTable *water_mt = new G4MaterialPropertiesTable();
+water_mt->AddProperty("RINDEX", water_PP, water_RIND, NUMENTRIES_water);
+water_mt->AddProperty("ABSLENGTH", water_PP, water_ABSL, NUMENTRIES_water);
+water->SetMaterialPropertiesTable(water_mt);
 
 // scintillator (TODO: too simple)
+const G4int NUMENTRIES_scint = 48;
 G4Material* liquid_scintillator = new G4Material(name="LiquidScintillator",
 						 density=0.9*g/cm3, ncomponents=2);
 liquid_scintillator->AddElement(C, 1);
 liquid_scintillator->AddElement(H, 2);
-G4double scint_PP[NUMENTRIES] = {7.0*eV, 7.07*eV, 7.14*eV}; // wavelengths
-G4double scint_SCINT[NUMENTRIES] = {0.1, 1.0, 0.1}; // efficiency to scintillate
-G4double scint_RIND[NUMENTRIES] = {1.5, 1.5, 1.5};  // refractive index
-G4double scint_ABSL[NUMENTRIES] = {35*cm, 35*cm, 35*cm}; // Absorption Length
+G4double scint_PP[NUMENTRIES_scint] = 
+{ 
+  1.2301*eV, 1.2692*eV, 1.3109*eV, 1.3428*eV, 1.3855*eV, 1.4297*eV, 
+  1.4722*eV, 1.5351*eV, 1.586*eV, 1.6689*eV, 1.7418*eV, 1.8283*eV, 
+  1.9849*eV, 2.1644*eV, 2.2777*eV, 2.3836*eV, 2.4954*eV, 2.6423*eV, 
+  2.7644*eV, 2.8466*eV, 2.9641*eV, 3.0917*eV, 3.2381*eV, 3.3437*eV, 
+  3.4316*eV, 3.5503*eV, 3.6776*eV, 3.8043*eV, 3.9508*eV, 4.0857*eV, 
+  4.2301*eV, 4.3585*eV, 4.4393*eV, 4.5809*eV, 4.7009*eV, 4.893*eV, 
+  5.0126*eV, 5.2127*eV, 5.2509*eV, 5.3091*eV, 5.3686*eV, 5.3888*eV, 
+  5.4501*eV, 5.4918*eV, 5.5556*eV, 5.6208*eV, 5.733*eV, 5.9466*eV
+};
+
+G4double scint_SCINT[NUMENTRIES_scint]; // efficiency to scintilate TODO
+for(int i=0; i<NUMENTRIES_scint; i++) scint_SCINT[i]=1.0;
+
+/// This is pulled from plots by Wan Chan Tseung UW 2011 data
+G4double scint_RIND[NUMENTRIES_scint] = 
+{
+  1.4665, 1.468, 1.4676, 1.4686, 1.4691, 1.4697, 1.4702, 1.4704, 1.4718, 
+  1.4742, 1.4748, 1.4758, 1.481, 1.4835, 1.4845, 1.4864, 1.4901, 1.492, 
+  1.4948, 1.4971, 1.5004, 1.505, 1.5087, 1.5115, 1.5143, 1.5198, 1.5239, 
+  1.5285, 1.5345, 1.5404, 1.5473, 1.5551, 1.5628, 1.5711, 1.5811, 1.5921, 
+  1.6049, 1.6185, 1.6295, 1.6372, 1.6496, 1.6568, 1.666, 1.6892, 1.7029, 
+  1.7471, 1.7571, 1.7444
+};
+G4double scint_ABSL[NUMENTRIES_scint]; // Absorption lengths TODO
+for(int i=0; i<NUMENTRIES_scint; i++) scint_ABSL[i]=350*cm;
+
 G4MaterialPropertiesTable* scint_mt = new G4MaterialPropertiesTable();
-scint_mt->AddProperty("FASTCOMPONENT", scint_PP, scint_SCINT, NUMENTRIES);
-scint_mt->AddProperty("SLOWCOMPONENT", scint_PP, scint_SCINT, NUMENTRIES);
-scint_mt->AddProperty("RINDEX", scint_PP, scint_RIND, NUMENTRIES);
-scint_mt->AddProperty("ABSLENGTH", scint_PP, scint_ABSL, NUMENTRIES);
-scint_mt->AddConstProperty("SCINTILLATIONYIELD", 12000/MeV);
+scint_mt->AddProperty("FASTCOMPONENT", scint_PP, scint_SCINT, NUMENTRIES_scint);
+scint_mt->AddProperty("SLOWCOMPONENT", scint_PP, scint_SCINT, NUMENTRIES_scint);
+scint_mt->AddProperty("RINDEX", scint_PP, scint_RIND, NUMENTRIES_scint);
+scint_mt->AddProperty("ABSLENGTH", scint_PP, scint_ABSL, NUMENTRIES_scint);
+scint_mt->AddConstProperty("SCINTILLATIONYIELD", 120/MeV);
 scint_mt->AddConstProperty("RESOLUTIONSCALE", 1.0);
-scint_mt->AddConstProperty("FASTTIMECONSTANT", 3.8*ns);
-scint_mt->AddConstProperty("SLOWTIMECONSTANT", 10.*ns);
+scint_mt->AddConstProperty("FASTTIMECONSTANT", 4.3*ns);
+scint_mt->AddConstProperty("SLOWTIMECONSTANT", 16.*ns);
 scint_mt->AddConstProperty("YIELDRATIO", 1.0);
 liquid_scintillator->SetMaterialPropertiesTable(scint_mt);
+
+// Adding optical surfaces:
+
 
 // assign materials
 
@@ -141,3 +244,11 @@ pmtholderfill_mat = water;
 target_mat = liquid_scintillator;
 pmt_mat = quartz;
 phcath_mat = cathmetalAl;
+
+pmtholderfill_mat=liquid_scintillator;
+pmt_mat=liquid_scintillator;
+
+//acrylic_mat=liquid_scintillator;
+pmtholder_mat=liquid_scintillator;
+
+acrylic_mat = 

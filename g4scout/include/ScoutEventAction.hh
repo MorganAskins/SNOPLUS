@@ -46,6 +46,7 @@ public:
 
   // Specific scout methods
   void FillRootEvent(G4int);
+  void FillHDF5Event(G4int);
 };
 
 #endif

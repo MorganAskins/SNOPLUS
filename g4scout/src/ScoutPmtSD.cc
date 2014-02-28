@@ -27,8 +27,13 @@ void ScoutPmtSD::Initialize(G4HCofThisEvent*)
 G4bool ScoutPmtSD::ProcessHits(G4Step* aStep, G4TouchableHistory*)
 {
   ScoutPmtHit* aPmtHit = new ScoutPmtHit();
-  aPmtHit->SetPos(aStep->GetPostStepPoint()->GetPosition());
+
+  aPmtHit->SetEnergy(aStep->GetPostStepPoint()->GetTotalEnergy());
+  aPmtHit->SetPos(aStep->GetPreStepPoint()->GetPosition());
+  aPmtHit->SetDir(aStep->GetPostStepPoint()->GetMomentumDirection());
+  aPmtHit->SetPol(aStep->GetPostStepPoint()->GetPolarization());
   aPmtHit->SetTime(aStep->GetPostStepPoint()->GetGlobalTime());
+  aPmtHit->SetTubeID(aStep->GetPreStepPoint()->GetTouchable()->GetCopyNumber());
   mHitID=mPmtCollection->insert(aPmtHit);
 
   return true;
@@ -44,8 +49,16 @@ void ScoutPmtSD::EndOfEvent(G4HCofThisEvent* HCE)
   HCE->AddHitsCollection(HCID, mPmtCollection);
 
   G4int nHits = mPmtCollection->entries();
+  // test
   if(verboseLevel>=1)
+  {
     G4cout << "  PMT Collection: " << nHits << " hits" << G4endl;
+    std::vector<ScoutPmtHit*> *hitscoll = mPmtCollection->GetVector();
+    for(G4int i=0; i<nHits; i++)
+    {
+      G4cout << "     Tube ID: " << (hitscoll->at(i))->GetTubeID() << G4endl;
+    }
+  }
 }
 
 void ScoutPmtSD::clear() {;}

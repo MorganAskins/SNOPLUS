@@ -40,7 +40,7 @@ EXTRALIBS += $(ROOTLIBS)
 
 EXTRA_LINK_DEPENDENCIES := 
 
-CPPFLAGS += -std=c++11
+CPPFLAGS += -std=c++11 -lhdf5 -lhdf5_cpp
 
 .PHONY: all
 all: lib bin

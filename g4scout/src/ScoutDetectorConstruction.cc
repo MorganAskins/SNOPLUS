@@ -1,9 +1,11 @@
 // Scout Detector Design
+#include <string>
 
 #include "ScoutDetectorConstruction.hh"
 #include "ScoutDetectorMessenger.hh"
 #include "ScoutScintSD.hh"
 #include "ScoutPmtSD.hh"
+#include "ScoutPmtInfo.hh"
 
 #include "G4SystemOfUnits.hh"
 #include "G4Material.hh"
@@ -61,12 +63,14 @@ ScoutDetectorConstruction::~ScoutDetectorConstruction()
 
 void ScoutDetectorConstruction::DefineMaterials()
 {
-  #include "ScoutDetectorMaterial.icc"
+//#include "ScoutDetectorMaterial.icc"
+#include "ScoutDetectorMaterialSimple.icc"
 }
 
 G4VPhysicalVolume* ScoutDetectorConstruction::Construct()
 {
   DefineMaterials();
+  G4cout << "CONSTRUCTING THE GEOMETRY" << G4endl;
   // List of volumes are as follows (in order):
   // World, Target
   // Note: G4 Objects use radii (even for boxes)
@@ -126,6 +130,12 @@ G4VPhysicalVolume* ScoutDetectorConstruction::Construct()
   AcrylicVisAt->SetVisibility(true);
   mAcrylicLog->SetVisAttributes(AcrylicVisAt);
 
+  // // Acrylic -- Scintillator Boundary
+  // G4OpticalSurface* AcrylicScintSurface = new G4OpticalSurface
+  //   ("AcrylicScintSurface", unified, polished, dielectric_dielectric);
+  // G4LogicalBorderSurface* AcrylicScintBorder = new G4LogicalBorderSurface
+  //   ("AcrylicScintBorder", mAcrylicPhys, mTargetPhys, AcrylicScintSurface);
+
   // Target Scintillator
   G4Box* target_box = new G4Box("target_box", targetDimensions[0],
 				targetDimensions[1], targetDimensions[2]);
@@ -136,35 +146,32 @@ G4VPhysicalVolume* ScoutDetectorConstruction::Construct()
   TargetVisAt->SetVisibility(true);
   mTargetLog->SetVisAttributes(TargetVisAt);
 
-  ConstructPmt();
+  //ConstructPmt();
+  G4cout << "PLACING THE PMTs" << G4endl;
   PlacePmts();
-
-
 
   // Sensitive Detectors
   G4SDManager* SDMan = G4SDManager::GetSDMpointer();
 
-  G4String name="/Scout/ScintSD";
-  mScoutSD = new ScoutScintSD(name, this);
-  SDMan->AddNewDetector(mScoutSD);
-  mTargetLog->SetSensitiveDetector(mScoutSD);
+  // G4String name="/Scout/ScintSD";
+  // mScoutSD = new ScoutScintSD(name, this);
+  // SDMan->AddNewDetector(mScoutSD);
+  // mTargetLog->SetSensitiveDetector(mScoutSD);
   
   SDMan = G4SDManager::GetSDMpointer();
-  name="/Scout/PmtSD";
+  G4String name="/Scout/PmtSD";
   mPmtSD = new ScoutPmtSD(name, this);
   SDMan->AddNewDetector(mPmtSD);
-  mPhcathLog->SetSensitiveDetector(mPmtSD);
+  for(int i=0; i<18; i++)
+    mPhcathLog[i]->SetSensitiveDetector(mPmtSD);
+  //mPhcathLog->SetSensitiveDetector(mPmtD);
 
   return mWorldPhys;
 }
 
 
-void ScoutDetectorConstruction::ConstructPmt()
+void ScoutDetectorConstruction::ConstructPmt(G4int pmtTubeID)
 {
-  // Pmt Holders
-
-  // Photomultipliers
-
   G4Sphere* pmt_window = new G4Sphere("pmt_sphere", 0, 2*pmtRadius, 0*deg,
   				      360*deg, 0*deg, 30*deg);
   G4Tubs* pmt_tube = new G4Tubs("pmt_tube", 0, pmtRadius, 0.5*pmtHeight,
@@ -174,72 +181,82 @@ void ScoutDetectorConstruction::ConstructPmt()
 							 G4ThreeVector(0, 0, 0.5*pmtHeight-
 								       2*pmtRadius*std::cos(30*deg))));
 
-  mPmtLog = new G4LogicalVolume(pmt_sol, pmt_mat, "mPmtLog");
-  //G4RotationMatrix* pmtdirection = new G4RotationMatrix(0*deg, 180*deg, 0);
-  //mPmtPhys = new G4PVPlacement(pmtdirection, pmtPosition, "mPmtPhys", mPmtLog, mLabPhys, false, 0);
-  
-  //G4OpticalSurface* pmt_opsurf = new G4OpticalSurface("pmt_opsurf", unified, polished, dielectric_dielectric);
-  //G4LogicalBorderSurface* pmt_surf = new G4LogicalBorderSurface("pmt_surf", mTargetPhys, mPmtPhys, pmt_opsurf);
+  std::string pmtlogname="mPmtLog"+std::to_string(pmtTubeID);
+  mPmtLog[pmtTubeID] = new G4LogicalVolume(pmt_sol, pmt_mat, pmtlogname.c_str());
 
   G4VisAttributes* PmtVisAt = new G4VisAttributes(red);
   PmtVisAt->SetForceSolid(true);
   PmtVisAt->SetVisibility(true);
-  mPmtLog->SetVisAttributes(PmtVisAt);
+  mPmtLog[pmtTubeID]->SetVisAttributes(PmtVisAt);
 
   // Photocathode
   G4double phcathVOffset = 0.5*pmtHeight-2*pmtRadius*std::cos(30*deg);
   G4double phcathVPosition = phcathVOffset;
-
-  G4Sphere* phcath_sol = new G4Sphere("phcath_sphere", 0,
-				      2*pmtRadius+1.6*mm, 0*deg, 360*deg,
+  G4Sphere* phcath_shell = new G4Sphere("phcath_sphere_shell", 2*pmtRadius-1.6*mm,
+					2*pmtRadius+1.6*mm, 0*deg, 360*deg,
+					0*deg, 27*deg);
+  G4Sphere* phcath_sol = new G4Sphere("phcath_sphere_sol", 2*pmtRadius-0.1*mm,
+				      2*pmtRadius+0.1*mm, 0*deg, 360*deg,
   				      0*deg, 27*deg);
-
-  mPhcathLog = new G4LogicalVolume(phcath_sol, phcath_mat, "mPhcathLog");
-  // mPhcathPhys = new G4PVPlacement(0, G4ThreeVector(0, 0, phcathVPosition),
-  // 				  "mPhcathPhys", mPhcathLog, mPmtPhys, false, 0);
-
-  //G4OpticalSurface* phcath_opsurf = new G4OpticalSurface("phcath_opsurf", unified, polished, dielectric_dielectric);
-  //G4LogicalBorderSurface* phcath_surf = new G4LogicalBorderSurface("phcath_surf", mPmtPhys, mPhcathPhys, phcath_opsurf);
-  
-  G4MaterialPropertiesTable* phcath_mt = new G4MaterialPropertiesTable();
-  phcath_mt->AddProperty("REFLECTIVITY", phcath_PP, phcath_REFL, NUM);
-  //phcath_opsurf->SetMaterialPropertiesTable(phcath_mt);
+  std::string phcathstoplogname="mPhcathStopLog"+std::to_string(pmtTubeID);
+  mPhcathStopLog[pmtTubeID] = new G4LogicalVolume(phcath_shell, phcathstop_mat, phcathstoplogname.c_str());
+  std::string phcathlogname="mPhcathLog"+std::to_string(pmtTubeID);
+  mPhcathLog[pmtTubeID] = new G4LogicalVolume(phcath_sol, phcath_mat, phcathlogname.c_str());
 
   G4VisAttributes* PhcathVisAt= new G4VisAttributes(lblue);
   PhcathVisAt->SetForceSolid(true);
   PhcathVisAt->SetVisibility(true);
-  mPhcathLog->SetVisAttributes(PhcathVisAt);
+  mPhcathLog[pmtTubeID]->SetVisAttributes(PhcathVisAt);
 }
 
 void ScoutDetectorConstruction::PlacePmts()
 {
-  G4Box* pmtholder_box = new G4Box("pmtholder_box", pmtHolderDimensions[0],
-				   pmtHolderDimensions[1], pmtHolderDimensions[2]);
-  mPmtHolderLog = new G4LogicalVolume(pmtholder_box, pmtholder_mat, "mPmtHolderLog");
   // Place nine per side inside their pmt holders
+  G4int pmtTubeID=0;
   for(int side=0; side<2; side++)
     for(int row=0; row<3; row++)
       for(int col=0; col<3; col++)
       {
+	G4Box* pmtholder_box = new G4Box("pmtholder_box", pmtHolderDimensions[0],
+					 pmtHolderDimensions[1], pmtHolderDimensions[2]);
+	std::string holderlogname="mPmtHolderLog"+std::to_string(pmtTubeID);
+	mPmtHolderLog[pmtTubeID] = new G4LogicalVolume(pmtholder_box, pmtholder_mat, holderlogname.c_str());
+	
+	// Place the pmt in the collection object
+	mPmtInfoCollection.push_back( new ScoutPmtInfo(side, row, col, pmtTubeID) );
 	G4RotationMatrix* pmtdirection = new G4RotationMatrix(0*deg, (1-side)*180*deg, 0);
 	G4ThreeVector pmtPosition( (row-1)*(acrylicDimensions[0]*(2./3)), 
 				   (col-1)*(acrylicDimensions[1]*(2./3)), 
 				   pow(-1,side)*(acrylicDimensions[2]+pmtHolderDimensions[2]));
-
-	mPmtHolderPhys = new G4PVPlacement(pmtdirection, pmtPosition, "mPmtHolderPhys",
-					   mPmtHolderLog, mCopperPhys, false, 0);
+	std::string holdername ="mPmtHolderPhys"+std::to_string(pmtTubeID);
+	mPmtHolderPhys[pmtTubeID] = new G4PVPlacement(pmtdirection, pmtPosition, holdername.c_str(),
+					   mPmtHolderLog[pmtTubeID], mCopperPhys, false, pmtTubeID);
+	G4double phcathVOffset = 0.5*pmtHeight-2*pmtRadius*std::cos(30*deg);
+	G4Box* pmtholderfill_box = new G4Box("pmtholderfill_box", pmtHolderFillDimensions[0],
+					     pmtHolderFillDimensions[1], pmtHolderFillDimensions[2]);
+	std::string holderfillname="mPmtHolderFillLog"+std::to_string(pmtTubeID);
+	mPmtHolderFillLog[pmtTubeID] = new G4LogicalVolume(pmtholderfill_box, pmtholderfill_mat, 
+							   holderfillname.c_str());
+	std::string holderfillphysname="mPmtHolderFillPhys"+std::to_string(pmtTubeID);
+	mPmtHolderFillPhys[pmtTubeID] = new G4PVPlacement(0, G4ThreeVector(0, 0, 0), holderfillphysname.c_str(),
+					       mPmtHolderFillLog[pmtTubeID], mPmtHolderPhys[pmtTubeID], 
+					       false, pmtTubeID);
+	ConstructPmt(pmtTubeID);
+	std::string pmtphysname="mPmtPhys"+std::to_string(pmtTubeID);
+	mPmtPhys[pmtTubeID] = new G4PVPlacement(0, G4ThreeVector(0, 0, -pmtStandOff), pmtphysname.c_str(), 
+						mPmtLog[pmtTubeID], mPmtHolderFillPhys[pmtTubeID], 
+						false, pmtTubeID);
+	std::string phcathphysname="mPhcathPhys"+std::to_string(pmtTubeID);
+	mPhcathPhys[pmtTubeID] = new G4PVPlacement(0, G4ThreeVector(0, 0, phcathVOffset),
+					phcathphysname.c_str(), mPhcathLog[pmtTubeID], 
+					mPmtPhys[pmtTubeID], false, pmtTubeID);
+	std::string phcathstopphysname="mPhcathStopPhys"+std::to_string(pmtTubeID);
+	mPhcathStopPhys[pmtTubeID] = new G4PVPlacement(0, G4ThreeVector(0, 0, phcathVOffset),
+						       phcathstopphysname.c_str(), mPhcathStopLog[pmtTubeID], 
+						       mPhcathPhys[pmtTubeID], false, pmtTubeID);
+	pmtTubeID++;
       }
-  G4double phcathVOffset = 0.5*pmtHeight-2*pmtRadius*std::cos(30*deg);
-  G4Box* pmtholderfill_box = new G4Box("pmtholderfill_box", pmtHolderFillDimensions[0],
-				       pmtHolderFillDimensions[1], pmtHolderFillDimensions[2]);
-  mPmtHolderFillLog = new G4LogicalVolume(pmtholderfill_box, pmtholderfill_mat, "mPmtHolderFillLog");
-  mPmtHolderFillPhys = new G4PVPlacement(0, G4ThreeVector(0, 0, 0), "mPmtHolderFillPhys",
-					 mPmtHolderFillLog, mPmtHolderPhys, false, 0);
 
-  mPmtPhys = new G4PVPlacement(0, G4ThreeVector(0, 0, -pmtStandOff), "mPmtPhys", 
-			       mPmtLog, mPmtHolderFillPhys, false, 0);
-  mPhcathPhys = new G4PVPlacement(0, G4ThreeVector(0, 0, phcathVOffset),
-				  "mPhcathPhys", mPhcathLog, mPmtPhys, false, 0);
   return;
 }
 

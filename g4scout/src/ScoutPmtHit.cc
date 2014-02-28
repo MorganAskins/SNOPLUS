@@ -5,6 +5,7 @@
 #include "G4Circle.hh"
 #include "G4Colour.hh"
 #include "G4VisAttributes.hh"
+#include "G4LogicalVolume.hh"
 
 #include <iomanip>
 
@@ -12,7 +13,10 @@ G4Allocator<ScoutPmtHit> ScoutPmtHitsAllocator;
 
 ScoutPmtHit::ScoutPmtHit()
 {
+  G4double mEnergy=0;
   mPosition = G4ThreeVector(0, 0, 0);
+  mDirection = G4ThreeVector(0, 0, 0);
+  mPolarization = G4ThreeVector(0, 0, 0);
   mTime = 0;
 }
 

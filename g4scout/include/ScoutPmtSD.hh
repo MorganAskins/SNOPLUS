@@ -1,6 +1,8 @@
 #ifndef SCOUTPMTSD_h
 #define SCOUTPMTSD_h
 
+#include <map>
+
 #include "G4VSensitiveDetector.hh"
 #include "globals.hh"
 
@@ -22,6 +24,7 @@ class ScoutPmtSD : public G4VSensitiveDetector
   ScoutPmtHitsCollection* mPmtCollection;
   ScoutDetectorConstruction* mScoutDetector;
   G4int mHitID;
+  std::map<int, int> mPmtHitMap;
 
 public:
   ScoutPmtSD(G4String, ScoutDetectorConstruction*);

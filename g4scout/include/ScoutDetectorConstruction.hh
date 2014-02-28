@@ -8,7 +8,7 @@
 
 #include "G4VisAttributes.hh"
 #include "G4Colour.hh"
-
+#include <vector>
 
 /*!
   @class ScoutDetectorConstruction
@@ -31,13 +31,15 @@ class ScoutPmtSD;
 // Messenger to pass information from macros
 // about detector design
 class ScoutDetectorMessenger;
+class ScoutPmtInfo;
 
 class ScoutDetectorConstruction : public G4VUserDetectorConstruction
 {
   ScoutScintSD* mScoutSD;
   ScoutPmtSD* mPmtSD;
+  std::vector<ScoutPmtInfo*> mPmtInfoCollection;
   void DefineMaterials();	///< Setup the materials list
-  void ConstructPmt();		///< Build array of Pmts
+  void ConstructPmt(G4int);	///< Build array of Pmts
   void PlacePmts();
   ScoutDetectorMessenger* mDetectorMessenger;
   void InitVariables();
@@ -64,18 +66,21 @@ private:			// Materials, volumes, variables
   G4VPhysicalVolume* mBpolyPhys;
   G4LogicalVolume* mCopperLog;
   G4VPhysicalVolume* mCopperPhys;
-  G4LogicalVolume* mPmtHolderLog;
-  G4VPhysicalVolume* mPmtHolderPhys;
-  G4LogicalVolume* mPmtHolderFillLog;
-  G4VPhysicalVolume* mPmtHolderFillPhys;
   G4LogicalVolume* mAcrylicLog;
   G4VPhysicalVolume* mAcrylicPhys;
   G4LogicalVolume* mTargetLog;
   G4VPhysicalVolume* mTargetPhys;
-  G4LogicalVolume* mPmtLog;
-  G4VPhysicalVolume* mPmtPhys;
-  G4LogicalVolume* mPhcathLog;
-  G4VPhysicalVolume* mPhcathPhys;
+  // These volumes are duplicated to num pmts
+  G4LogicalVolume* mPmtHolderLog[18];
+  G4VPhysicalVolume* mPmtHolderPhys[18];
+  G4LogicalVolume* mPmtHolderFillLog[18];
+  G4VPhysicalVolume* mPmtHolderFillPhys[18];
+  G4LogicalVolume* mPmtLog[18];
+  G4VPhysicalVolume* mPmtPhys[18];
+  G4LogicalVolume* mPhcathLog[18];
+  G4VPhysicalVolume* mPhcathPhys[18];
+  G4LogicalVolume* mPhcathStopLog[18];
+  G4VPhysicalVolume* mPhcathStopPhys[18];
 
   // colors
   G4Colour white = G4Colour(1.0, 1.0, 1.0);
