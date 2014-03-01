@@ -37,14 +37,15 @@ int main(int argc, char* argv[])
     return -1;
   }
 
-  // Process the data
-  Scout::Digitizer digi(fname);
-  digi.Digitize();
   // Write the data back into hdf5
   std::string outputname=fname.substr(0, fname.size()-3)+"digi.h5";
-  std::cout << "Writing to: " << outputname << std::endl;
-  //Scout::H5Writer writer(digi, outputname);
-  //writer->write();
+  std::cout << "Writing to: " << outputname << std::endl;;
+
+  Scout::H5Reader reader(fname);
+  Scout::H5Writer writer(outputname);
+
+  Scout::Digitizer digi(reader, writer);
+  digi->DigitizeAllData();
 
   return 0;
 }
