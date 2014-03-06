@@ -29,3 +29,14 @@ void ScoutRunAction::BeginOfRunAction(const G4Run* aRun)
 void ScoutRunAction::EndOfRunAction(const G4Run* aRun)
 {
 }
+
+void ScoutRunAction::ClearLastEvent()
+{
+  mPmtID.clear();
+  mEnergy.clear();
+  mPosition.clear();
+  mDirection.clear();
+  mPolarization.clear();
+  mTime.clear();
+  return;
+}

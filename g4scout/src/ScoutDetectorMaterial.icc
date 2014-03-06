@@ -221,7 +221,7 @@ scint_mt->AddProperty("FASTCOMPONENT", scint_PP, scint_SCINT, NUMENTRIES_scint);
 scint_mt->AddProperty("SLOWCOMPONENT", scint_PP, scint_SCINT, NUMENTRIES_scint);
 scint_mt->AddProperty("RINDEX", scint_PP, scint_RIND, NUMENTRIES_scint);
 scint_mt->AddProperty("ABSLENGTH", scint_PP, scint_ABSL, NUMENTRIES_scint);
-scint_mt->AddConstProperty("SCINTILLATIONYIELD", 120/MeV);
+scint_mt->AddConstProperty("SCINTILLATIONYIELD", 12000/MeV);
 scint_mt->AddConstProperty("RESOLUTIONSCALE", 1.0);
 scint_mt->AddConstProperty("FASTTIMECONSTANT", 4.3*ns);
 scint_mt->AddConstProperty("SLOWTIMECONSTANT", 16.*ns);

@@ -34,6 +34,7 @@ ScoutEventAction::~ScoutEventAction()
 
 void ScoutEventAction::BeginOfEventAction(const G4Event*)
 {
+  mRunAction->ClearLastEvent();
   if(mScintillatorCollID == -1)
   {
     G4SDManager *SDman = G4SDManager::GetSDMpointer();
@@ -52,7 +53,7 @@ void ScoutEventAction::EndOfEventAction(const G4Event* event)
   FillRootEvent(1);
   G4int evid = event->GetEventID();
   
-  ScoutScintHitsCollection* SHC = NULL;
+  //ScoutScintHitsCollection* SHC = NULL;
   ScoutPmtHitsCollection* PHC = NULL;
   G4HCofThisEvent* HCE = event->GetHCofThisEvent();
   if(HCE)

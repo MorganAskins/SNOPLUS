@@ -119,6 +119,7 @@ G4VPhysicalVolume* ScoutDetectorConstruction::Construct()
   G4VisAttributes* CopperVisAt = new G4VisAttributes(orange);
   CopperVisAt->SetVisibility(true);
   mCopperLog->SetVisAttributes(CopperVisAt);
+								    
 
   // Acrylic Vessel
   G4Box* acrylic_box = new G4Box("acrylic_box", acrylicDimensions[0], 
@@ -130,6 +131,8 @@ G4VPhysicalVolume* ScoutDetectorConstruction::Construct()
   AcrylicVisAt->SetVisibility(true);
   mAcrylicLog->SetVisAttributes(AcrylicVisAt);
 
+  G4LogicalBorderSurface* ShinyCopper = new G4LogicalBorderSurface( "ShinyCopper", mAcrylicPhys,
+								    mCopperPhys, mShinySurface );
   // // Acrylic -- Scintillator Boundary
   // G4OpticalSurface* AcrylicScintSurface = new G4OpticalSurface
   //   ("AcrylicScintSurface", unified, polished, dielectric_dielectric);

@@ -21,6 +21,7 @@ class G4LogicalVolume;
 class G4VPhysicalVolume;
 class G4Material;
 class G4Colour;
+class G4OpticalSurface;
 
 class G4UserLimits;
 
@@ -81,6 +82,9 @@ private:			// Materials, volumes, variables
   G4VPhysicalVolume* mPhcathPhys[18];
   G4LogicalVolume* mPhcathStopLog[18];
   G4VPhysicalVolume* mPhcathStopPhys[18];
+
+  // Optical Surface
+  G4OpticalSurface* mShinySurface;
 
   // colors
   G4Colour white = G4Colour(1.0, 1.0, 1.0);

@@ -39,6 +39,7 @@ class ScoutRunAction : public G4UserRunAction
 public:
   ScoutRunAction();
   ~ScoutRunAction();
+  void ClearLastEvent();
 
   // inherited from G4UserRunAction
   void BeginOfRunAction(const G4Run*);

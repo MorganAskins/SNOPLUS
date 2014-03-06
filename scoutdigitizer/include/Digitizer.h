@@ -5,6 +5,7 @@
 #define DIGITIZER_h
 
 #include <vector>
+#include <array>
 #include <string>
 #include <H5Cpp.h>
 #include "H5Reader.h"
@@ -35,7 +36,7 @@ namespace Scout
 
     // New digitized data:
     std::vector<double>* mCharge;      // nV*s
-    std::vector<double>* mVoltage[18]; // V
+    std::vector<<std::array,double> >* mVoltage; // V
     std::vector<double>* mArrivalTime; // ns
 
     void ReadData();

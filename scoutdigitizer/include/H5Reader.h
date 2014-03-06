@@ -9,6 +9,8 @@ namespace Scout
 {
   class H5Reader
   {
+    H5::H5File* file;
+
     int mSize;
     int mCurrentEvent;
     std::vector<int> mPmtId;
@@ -27,6 +29,20 @@ namespace Scout
     H5Reader(std::string filename);
     ~H5Reader();
     void Update();
+    bool StillAlive();
+
+    std::vector<int>* GetPmtId(){return &mPmtId;}
+    std::vector<double>* GetTime(){return &mTime;}
+    std::vector<double>* GetEnergy(){return &mEnergy;}
+    std::vector<double>* GetPositionX(){return &mPositionX;}
+    std::vector<double>* GetPositionY(){return &mPositionY;}
+    std::vector<double>* GetPositionZ(){return &mPositionZ;}
+    std::vector<double>* GetDirectionX(){return &mDirectionX;}
+    std::vector<double>* GetDirectionY(){return &mDirectionY;}
+    std::vector<double>* GetDirectionZ(){return &mDirectionZ;}
+    std::vector<double>* GetPolarizationX(){return &mPolarizationX;}
+    std::vector<double>* GetPolarizationY(){return &mPolarizationY;}
+    std::vector<double>* GetPolarizationZ(){return &mPolarizationZ;}
 
   };
 };
