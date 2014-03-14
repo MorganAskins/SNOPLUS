@@ -12,16 +12,16 @@ namespace Scout
   {
     H5::H5File* file;
     
-    std::array<double, 18>* mCharge;       // nV*s
-    std::array<double, 18>* mArrivalTime;  // nS
+    std::array<std::vector<double>, 18>* mCharge;       // nV*s
+    //std::array<std::vector<double>, 18>* mArrivalTime;  // nS
   public:
     H5Writer(std::string filename);
     ~H5Writer();
     void Write(int);
     void Init();
     
-    std::array<double, 18>* GetCharge(){return mCharge;}
-    std::array<double, 18>* GetArrivalTime(){return mArrivalTime;}
+    std::array<std::vector<double>, 18>* GetCharge(){return mCharge;}
+    //std::array<std::vector<double>, 18>* GetArrivalTime(){return mArrivalTime;}
   };
 };
 

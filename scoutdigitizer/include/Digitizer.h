@@ -35,8 +35,8 @@ namespace Scout
     std::vector<double>* mPolarizationZ;
 
     // New digitized data:
-    std::array<double, 18>* mCharge;      // nV*s
-    std::array<double, 18>* mArrivalTime; // ns
+    std::array<std::vector<double>, 18>* mCharge;      // nV*s
+    //std::array<std::vector<double>, 18>* mArrivalTime; // ns
 
     void ReadData();
     void Digitize();
