@@ -9,20 +9,19 @@
 namespace Scout
 {
   class H5Writer
-  {678
+  {
     H5::H5File* file;
     
-    std::vector<double> mCharge;       // nV*s
-    std::vector<std::array<double, 18> > mVoltage;      // V
-    std::vector<double> mArrivalTime;  // nS
+    std::array<double, 18>* mCharge;       // nV*s
+    std::array<double, 18>* mArrivalTime;  // nS
   public:
     H5Writer(std::string filename);
     ~H5Writer();
-    Write();
+    void Write(int);
+    void Init();
     
-    std::vector<double>* GetCharge(){return &mCharge;}
-    std::vector<std::array<double, 18> >* GetVoltage(){return &mArrivalTime;}
-    std::vector<double>* GetArrivalTime(){return mArrivalTime;}
+    std::array<double, 18>* GetCharge(){return mCharge;}
+    std::array<double, 18>* GetArrivalTime(){return mArrivalTime;}
   };
 };
 

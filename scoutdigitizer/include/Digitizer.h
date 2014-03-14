@@ -22,8 +22,8 @@ namespace Scout
 
     // The data to be read
     std::vector<double>* mTime;
-    std::vector<int>* mPmtID;
-    std::vector<double>* mEnergy;
+    std::vector<int>* mPmtId;
+    std::vector<double>* mPmtEnergy;
     std::vector<double>* mPositionX;
     std::vector<double>* mPositionY;
     std::vector<double>* mPositionZ;
@@ -35,15 +35,14 @@ namespace Scout
     std::vector<double>* mPolarizationZ;
 
     // New digitized data:
-    std::vector<double>* mCharge;      // nV*s
-    std::vector<<std::array,double> >* mVoltage; // V
-    std::vector<double>* mArrivalTime; // ns
+    std::array<double, 18>* mCharge;      // nV*s
+    std::array<double, 18>* mArrivalTime; // ns
 
     void ReadData();
     void Digitize();
 
   public:
-    Digitizer(std::string filename);
+    Digitizer(Scout::H5Reader*, Scout::H5Writer*);
     ~Digitizer();
     void DigitizeAllData();
   };

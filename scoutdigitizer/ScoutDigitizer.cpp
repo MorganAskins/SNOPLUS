@@ -42,10 +42,15 @@ int main(int argc, char* argv[])
   std::cout << "Writing to: " << outputname << std::endl;;
 
   Scout::H5Reader reader(fname);
+  std::cout << "Created the reader" << std::endl;
   Scout::H5Writer writer(outputname);
+  std::cout << "Created the writer" << std::endl;
 
-  Scout::Digitizer digi(reader, writer);
-  digi->DigitizeAllData();
+  Scout::Digitizer digi(&reader, &writer);
+  std::cout << "Digitizing data" << std::endl;
+  digi.DigitizeAllData();
+
+  std::cout << "c'est fini!" << std::endl;
 
   return 0;
 }
